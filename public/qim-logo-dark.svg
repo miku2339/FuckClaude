@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" role="img" aria-labelledby="title desc">
+  <title id="title">qimake qim monogram</title>
+  <desc id="desc">A lowercase qim monogram with a clearly descending q stem.</desc>
+  <circle cx="16" cy="18" r="10" stroke="#FFFFFF" stroke-width="8" fill="none"/>
+  <path d="M24 18v14" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="24" cy="34" r="2.5" fill="#39C5BB"/>
+  <circle cx="46" cy="11" r="4" fill="#F5DF4D"/>
+  <path d="M46 18v14" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <path d="M66 32V21c0-3.866 3.134-7 7-7s7 3.134 7 7v11" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M80 32V21c0-3.866 3.134-7 7-7s7 3.134 7 7v11" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

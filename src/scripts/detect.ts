@@ -1,60 +1,77 @@
 /**
- * Client-side entry point. Runs an animated "scan": each signal lights up in
- * turn, the gauge climbs as contributions add up, and once every signal has
- * been checked it shows a verdict plus the list of matched signals.
- * Everything runs locally in the browser.
+ * Browser entry point for the transparent QIM environment scan.
+ * Weighted values remain local. A same-origin edge request returns only the
+ * connection metadata Cloudflare already attaches to the page request.
  */
-import { SIGNALS, riskBand, signalVerdict, type SignalDef, type RiskBand } from '../config/signals';
-import { CN_MODELS } from '../config/cn-models';
+import {
+  SIGNALS,
+  riskBand,
+  signalVerdict,
+  type DetectOutcome,
+  type RiskBand,
+  type SignalDef,
+  type SignalId,
+} from '../config/signals';
 import { useTranslations, type Lang } from '../i18n/ui';
 import { renderResultCard, type CardHit } from './share-card';
 
-/**
- * High-risk consolation links — "But you still have Kimi Code, DeepSeek and GLM".
- * Kimi leads and is branded "Kimi Code"; URLs come from CN_MODELS (utm-tagged).
- */
-const BAND_HIGH_LINKS = [
-  { id: 'kimi', label: 'Kimi Code' },
-  { id: 'deepseek', label: 'DeepSeek' },
-  { id: 'glm', label: 'GLM' },
-].flatMap((link) => {
-  const model = CN_MODELS.find((m) => m.id === link.id);
-  return model ? [{ ...link, url: model.url }] : [];
-});
-
-const SCAN_STEP_MS = 460;
-const SETTLE_MS = 150;
+const SCAN_STEP_MS = 260;
+const SETTLE_MS = 90;
+const RING_R = 52;
+const RING_C = 2 * Math.PI * RING_R;
 
 function currentLang(): Lang {
   return document.documentElement.lang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 }
-const t = useTranslations(currentLang());
 
-function q<T extends Element = HTMLElement>(sel: string, root: ParentNode = document): T | null {
-  return root.querySelector<T>(sel);
+const t = useTranslations(currentLang());
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+function q<T extends Element = HTMLElement>(selector: string, root: ParentNode = document): T | null {
+  return root.querySelector<T>(selector);
 }
-const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-const RING_R = 52;
-const RING_C = 2 * Math.PI * RING_R;
 
 interface Hit {
   signal: SignalDef;
   contribution: number;
 }
 
-type MascotState = 'doze' | 'search' | 'low' | 'medium' | 'high';
-function setMascot(state: MascotState) {
-  q('#mascot')?.setAttribute('data-state', state);
+interface EdgeContext {
+  country: string | null;
+  timezone: string | null;
+  asn: number | null;
+  asOrganization: string | null;
 }
 
 function setRing(total: number) {
   const ring = q<SVGCircleElement>('#score-ring');
-  const valueEl = q('#score-value');
+  const value = q('#score-value');
   if (ring) {
     ring.style.strokeDasharray = `${RING_C}px`;
     ring.style.strokeDashoffset = `${RING_C * (1 - total / 100)}px`;
   }
-  if (valueEl) valueEl.textContent = String(total);
+  if (value) value.textContent = String(total);
+}
+
+function setHypothesis(
+  id: 'cluster' | 'software' | 'network',
+  state: 'pending' | 'none' | 'mixed' | 'observed' | 'context' | 'unavailable',
+  status: string,
+  value: string,
+) {
+  const card = q(`[data-hypothesis="${id}"]`);
+  if (!card) return;
+  card.setAttribute('data-state', state);
+  const statusEl = q('[data-field="status"]', card);
+  const valueEl = q('[data-field="value"]', card);
+  if (statusEl) statusEl.textContent = status;
+  if (valueEl) valueEl.textContent = value;
+}
+
+function resetHypotheses() {
+  for (const id of ['cluster', 'software', 'network'] as const) {
+    setHypothesis(id, 'pending', t('hypotheses.pending'), '—');
+  }
 }
 
 function resetUI() {
@@ -65,40 +82,38 @@ function resetUI() {
 
   const badge = q('#risk-badge');
   if (badge) {
-    badge.textContent = t('scan.detecting') + '…';
+    badge.textContent = `${t('scan.detecting')}…`;
     badge.removeAttribute('data-band');
   }
   const desc = q('#risk-desc');
-  if (desc) desc.textContent = '';
+  if (desc) desc.textContent = t('hero.notice');
 
-  const result = q('#result');
-  if (result) result.hidden = true;
-  const share = q('#share');
-  if (share) share.hidden = true;
-  const save = q('#share-save');
-  if (save) save.hidden = true;
-  resetCard();
+  q('#result')?.setAttribute('hidden', '');
+  q('#share')?.setAttribute('hidden', '');
+  q('#share-save')?.setAttribute('hidden', '');
+  cardBlob = null;
+  resetHypotheses();
 
-  for (const s of SIGNALS) {
-    const row = q(`[data-signal="${s.id}"]`);
+  for (const signal of SIGNALS) {
+    const row = q(`[data-signal="${signal.id}"]`);
     if (!row) continue;
     row.classList.remove('is-active', 'is-done');
     row.classList.add('is-pending');
     row.removeAttribute('data-verdict');
-    const val = q('[data-field="value"]', row);
-    const contrib = q('[data-field="contribution"]', row);
+    const value = q('[data-field="value"]', row);
+    const contribution = q('[data-field="contribution"]', row);
     const dot = q('[data-field="dot"]', row);
-    if (val) val.textContent = '';
-    if (contrib) contrib.textContent = '';
+    if (value) value.textContent = '';
+    if (contribution) contribution.textContent = '';
     if (dot) dot.className = 'dot';
   }
 }
 
 function finalize(total: number, hits: Hit[]) {
   const band = riskBand(total);
-  setMascot(band);
-  q('#score-gauge')?.removeAttribute('data-scanning');
-  q('#score-gauge')?.setAttribute('data-band', band);
+  const gauge = q('#score-gauge');
+  gauge?.setAttribute('data-scanning', 'false');
+  gauge?.setAttribute('data-band', band);
 
   const badge = q('#risk-badge');
   if (badge) {
@@ -106,36 +121,16 @@ function finalize(total: number, hits: Hit[]) {
     badge.setAttribute('data-band', band);
   }
   const desc = q('#risk-desc');
-  if (desc) {
-    desc.textContent = t(`band.${band}.desc`);
-    // High risk gets a consolation plug:
-    // "But you still have <Kimi Code>, <DeepSeek> and <GLM>".
-    if (band === 'high') {
-      desc.append(` ${t('band.high.extra')} `);
-      BAND_HIGH_LINKS.forEach((link, i) => {
-        if (i > 0) {
-          desc.append(i === BAND_HIGH_LINKS.length - 1 ? t('band.high.extraSepLast') : t('band.high.extraSep'));
-        }
-        const a = document.createElement('a');
-        a.href = link.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = link.label;
-        a.setAttribute('data-ga-event', 'cn_model_click');
-        a.setAttribute('data-ga-id', `${link.id}-band-high`);
-        desc.appendChild(a);
-      });
-    }
-  }
+  if (desc) desc.textContent = t(`band.${band}.desc`);
 
-  const titleEl = q('#result-title');
+  const title = q('#result-title');
   const hitsBox = q('#result-hits');
   if (hitsBox) hitsBox.innerHTML = '';
 
   if (hits.length === 0) {
-    if (titleEl) titleEl.textContent = t('result.noHits');
+    if (title) title.textContent = t('result.noHits');
   } else {
-    if (titleEl) titleEl.textContent = t('result.hitsTitle');
+    if (title) title.textContent = t('result.hitsTitle');
     for (const { signal, contribution } of hits) {
       const chip = document.createElement('span');
       chip.className = 'chip';
@@ -156,22 +151,91 @@ function finalize(total: number, hits: Hit[]) {
 
   updateShare(total, band);
   void buildCard(total, band, cardHits);
-
-  const result = q('#result');
-  if (result) result.hidden = false;
+  q('#result')?.removeAttribute('hidden');
 }
 
-/**
- * One-click sharing of the result. The message is rebuilt on every scan so it
- * always carries the latest score + verdict, then wired to native sharing
- * (Web Share API — the "adapt to clients" path that pops the OS/app share
- * sheet on mobile) and to per-platform web share links as a fallback.
- */
+function matchedNames(readings: Map<SignalId, DetectOutcome>, ids: SignalId[]): string[] {
+  return ids
+    .filter((id) => (readings.get(id)?.score ?? 0) >= 0.25)
+    .map((id) => t(`signal.${id}.name`));
+}
+
+function summarizeHypotheses(readings: Map<SignalId, DetectOutcome>) {
+  const cluster = matchedNames(readings, ['timezone', 'language', 'intlLocale', 'timezoneOffset']);
+  const clusterState = cluster.length >= 3 ? 'observed' : cluster.length > 0 ? 'mixed' : 'none';
+  setHypothesis(
+    'cluster',
+    clusterState,
+    t(`hypotheses.${clusterState}`),
+    cluster.length ? cluster.join(' · ') : t('hypotheses.none'),
+  );
+
+  const software = matchedNames(readings, ['fonts', 'vendorFonts', 'cnBrowser', 'deviceVendor']);
+  const softwareState = software.length >= 2 ? 'observed' : software.length > 0 ? 'mixed' : 'none';
+  setHypothesis(
+    'software',
+    softwareState,
+    t(`hypotheses.${softwareState}`),
+    software.length ? software.join(' · ') : t('hypotheses.none'),
+  );
+}
+
+async function fetchEdgeContext(): Promise<EdgeContext | null> {
+  try {
+    const response = await fetch(`/api/check?format=json&lang=${currentLang()}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+      credentials: 'same-origin',
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { geo?: Partial<EdgeContext> };
+    return {
+      country: data.geo?.country ?? null,
+      timezone: data.geo?.timezone ?? null,
+      asn: typeof data.geo?.asn === 'number' ? data.geo.asn : null,
+      asOrganization: data.geo?.asOrganization ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function summarizeEdgeContext(edge: EdgeContext | null, readings: Map<SignalId, DetectOutcome>) {
+  if (!edge) {
+    setHypothesis('network', 'unavailable', t('hypotheses.unavailable'), t('hypotheses.unavailable'));
+    return;
+  }
+
+  const parts = [edge.country, edge.timezone];
+  if (edge.asn) parts.push(`AS${edge.asn}`);
+  if (edge.asOrganization) parts.push(edge.asOrganization);
+
+  const localTimezone = readings.get('timezone')?.raw;
+  const mismatch = Boolean(localTimezone && edge.timezone && localTimezone !== edge.timezone);
+  if (localTimezone && edge.timezone) {
+    parts.push(mismatch ? t('network.timezoneDiff') : t('network.timezoneMatch'));
+  }
+
+  const focusStatus = ['CN', 'HK', 'MO'].includes(edge.country ?? '')
+    ? t('network.unlistedFocus')
+    : edge.country === 'TW'
+      ? t('network.listedTaiwan')
+      : t('network.verifyList');
+  parts.push(focusStatus);
+
+  setHypothesis(
+    'network',
+    mismatch ? 'mixed' : 'context',
+    mismatch ? t('hypotheses.mixed') : t('hypotheses.context'),
+    parts.filter(Boolean).join(' · '),
+  );
+}
+
 interface SharePayload {
   text: string;
   url: string;
 }
-let sharePayload: SharePayload = { text: '', url: '' };
 
 type ShareData = { title?: string; text?: string; url?: string; files?: File[] };
 const nav = navigator as Navigator & {
@@ -179,19 +243,22 @@ const nav = navigator as Navigator & {
   canShare?: (data: ShareData) => boolean;
 };
 
-const CARD_FILENAME = 'fuck-claude-result.png';
+const CARD_FILENAME = 'qim-environment-signal-result.png';
 let cardBlob: Blob | null = null;
+let sharePayload: SharePayload = { text: '', url: '' };
 
-function resetCard() {
-  cardBlob = null;
+function pageShareUrl(): string {
+  const url = new URL(window.location.href);
+  url.hash = '';
+  url.search = '';
+  return url.toString();
 }
 
-/** Render the shareable result image off the current scan (async, non-blocking). */
 async function buildCard(total: number, band: RiskBand, hits: CardHit[]) {
   try {
-    const blob = await renderResultCard({
+    cardBlob = await renderResultCard({
       lang: currentLang(),
-      title: t('hero.title'),
+      title: t('score.label'),
       score: total,
       band,
       bandTitle: t(`band.${band}.title`),
@@ -199,175 +266,111 @@ async function buildCard(total: number, band: RiskBand, hits: CardHit[]) {
       outOf: t('hero.scoreOutOf'),
       hits,
       url: pageShareUrl(),
-      brand: 'Fuck Claude',
+      brand: 'QIM Developer Signal Lab',
     });
-    cardBlob = blob;
-    const save = q<HTMLButtonElement>('#share-save');
-    if (save && blob) save.hidden = false;
+    if (cardBlob) q('#share-save')?.removeAttribute('hidden');
   } catch {
     cardBlob = null;
   }
 }
 
-function cardFile(): File | null {
-  return cardBlob ? new File([cardBlob], CARD_FILENAME, { type: 'image/png' }) : null;
-}
-
-function pageShareUrl(): string {
-  try {
-    const u = new URL(window.location.href);
-    u.hash = '';
-    u.search = '';
-    return u.toString();
-  } catch {
-    return window.location.href;
-  }
-}
-
-function shareCaption(): string {
-  return `${sharePayload.text} ${sharePayload.url}`.trim();
-}
-
 function updateShare(total: number, band: RiskBand) {
-  const verdict = t(`band.${band}.title`);
-  const text = t('share.text').replace('{score}', String(total)).replace('{verdict}', verdict);
-  const url = pageShareUrl();
-  sharePayload = { text, url };
-
-  const enc = encodeURIComponent;
-  const links: Record<string, string> = {
-    x: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
-    weibo: `https://service.weibo.com/share/share.php?url=${enc(url)}&title=${enc(text)}`,
-    telegram: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
-    reddit: `https://www.reddit.com/submit?url=${enc(url)}&title=${enc(text)}`,
+  sharePayload = {
+    text: t('share.text')
+      .replace('{score}', String(total))
+      .replace('{verdict}', t(`band.${band}.title`)),
+    url: pageShareUrl(),
   };
-  for (const key of Object.keys(links)) {
-    const a = q<HTMLAnchorElement>(`[data-share="${key}"]`);
-    if (a) a.href = links[key];
-  }
-
-  const native = q<HTMLButtonElement>('#share-native');
-  if (native && typeof nav.share === 'function') native.hidden = false;
-
-  const share = q('#share');
-  if (share) share.hidden = false;
+  if (typeof nav.share === 'function') q('#share-native')?.removeAttribute('hidden');
+  q('#share')?.removeAttribute('hidden');
 }
 
-function fallbackCopy(textToCopy: string): boolean {
-  try {
-    const ta = document.createElement('textarea');
-    ta.value = textToCopy;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    const ok = document.execCommand('copy');
-    document.body.removeChild(ta);
-    return ok;
-  } catch {
-    return false;
-  }
-}
-
-async function copyText(text: string): Promise<boolean> {
+async function copyText(value: string): Promise<boolean> {
   try {
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(value);
       return true;
     }
   } catch {
-    /* fall through to the execCommand fallback */
+    // The HTTPS production origin normally exposes the Clipboard API.
   }
-  return fallbackCopy(text);
+  return false;
 }
 
-/** Flash a button into its confirmed state, then restore the idle label. */
-function flashCopied(btn: HTMLElement, label: Element | null, idle: string, flashText = t('share.copied')) {
-  btn.classList.add('is-copied');
-  if (label) label.textContent = flashText;
-  setTimeout(() => {
-    btn.classList.remove('is-copied');
+function flashCopied(button: HTMLElement, label: Element | null, idle: string, flash = t('share.copied')) {
+  button.classList.add('is-copied');
+  if (label) label.textContent = flash;
+  window.setTimeout(() => {
+    button.classList.remove('is-copied');
     if (label) label.textContent = idle;
-  }, 1600);
+  }, 1500);
 }
 
-/** Native share sheet, attaching the result image when the platform allows it. */
-async function nativeShare(): Promise<boolean> {
-  if (typeof nav.share !== 'function') return false;
-  const file = cardFile();
+async function nativeShare() {
+  if (typeof nav.share !== 'function') return;
+  const file = cardBlob ? new File([cardBlob], CARD_FILENAME, { type: 'image/png' }) : null;
   try {
-    if (file && typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
+    if (file && nav.canShare?.({ files: [file] })) {
       await nav.share({ text: sharePayload.text, url: sharePayload.url, files: [file] });
     } else {
       await nav.share({ text: sharePayload.text, url: sharePayload.url });
     }
-    return true;
   } catch {
-    return false; // user dismissed or the platform refused
+    // Dismissal is not an application error.
   }
 }
 
-function saveImage(): boolean {
-  if (!cardBlob) return false;
-  try {
-    const url = URL.createObjectURL(cardBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = CARD_FILENAME;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    return true;
-  } catch {
-    return false;
-  }
+function saveImage() {
+  if (!cardBlob) return;
+  const url = URL.createObjectURL(cardBlob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = CARD_FILENAME;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function initShare() {
-  q<HTMLButtonElement>('#share-native')?.addEventListener('click', () => {
-    void nativeShare();
-  });
+  q('#share-native')?.addEventListener('click', () => void nativeShare());
 
   const copy = q<HTMLButtonElement>('#share-copy');
   const copyLabel = q('#share-copy-label');
   const copyIdle = copyLabel?.textContent ?? t('share.copy');
   copy?.addEventListener('click', async () => {
-    if (await copyText(shareCaption())) flashCopied(copy, copyLabel, copyIdle);
+    const value = `${sharePayload.text} ${sharePayload.url}`.trim();
+    if (await copyText(value)) flashCopied(copy, copyLabel, copyIdle);
   });
 
   const save = q<HTMLButtonElement>('#share-save');
   const saveLabel = q('#share-save-label');
   const saveIdle = saveLabel?.textContent ?? t('share.save');
   save?.addEventListener('click', () => {
-    if (saveImage()) flashCopied(save, saveLabel, saveIdle, t('share.saved'));
+    saveImage();
+    flashCopied(save, saveLabel, saveIdle, t('share.saved'));
   });
 }
 
-/** Remember an explicit language choice so the homepage auto-detect respects it. */
 function initLangMemory() {
-  for (const a of document.querySelectorAll<HTMLAnchorElement>('.lang-toggle a[data-lang]')) {
-    a.addEventListener('click', () => {
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('.lang-toggle a[data-lang]')) {
+    link.addEventListener('click', () => {
       try {
-        localStorage.setItem('fc-lang', a.dataset.lang || '');
+        localStorage.setItem('fc-lang', link.dataset.lang || '');
       } catch {
-        /* localStorage unavailable (private mode) — auto-detect still works */
+        // Language navigation still works without storage.
       }
     });
   }
 }
 
-/** Copy-to-clipboard for the default curl command shown in the API section. */
 function initApiCopy() {
-  const btn = q<HTMLButtonElement>('#api-copy');
+  const button = q<HTMLButtonElement>('#api-copy');
   const label = q('#api-copy-label');
   const idle = label?.textContent ?? t('share.copy');
-  btn?.addEventListener('click', async () => {
-    const text = btn.dataset.copy?.trim() ?? '';
-    if (text && (await copyText(text))) flashCopied(btn, label, idle);
+  button?.addEventListener('click', async () => {
+    const value = button.dataset.copy?.trim() ?? '';
+    if (value && (await copyText(value))) flashCopied(button, label, idle);
   });
 }
 
@@ -376,15 +379,16 @@ let running = false;
 async function run() {
   if (running) return;
   running = true;
-  const btn = q<HTMLButtonElement>('#retest');
-  if (btn) btn.disabled = true;
-
-  setMascot('search');
+  const button = q<HTMLButtonElement>('#retest');
+  const advanced = q<HTMLInputElement>('#advanced-optin')?.checked ?? false;
+  if (button) button.disabled = true;
   resetUI();
   await delay(SETTLE_MS);
 
-  let total = 0;
+  const edgePromise = fetchEdgeContext();
+  const readings = new Map<SignalId, DetectOutcome>();
   const hits: Hit[] = [];
+  let total = 0;
 
   for (const signal of SIGNALS) {
     const row = q(`[data-signal="${signal.id}"]`);
@@ -392,22 +396,30 @@ async function run() {
     row?.classList.add('is-active');
     await delay(SCAN_STEP_MS);
 
-    let outcome;
-    try {
-      outcome = await signal.detect();
-    } catch {
-      outcome = { raw: '—', score: 0 };
+    let outcome: DetectOutcome;
+    if (signal.intrusive && !advanced) {
+      outcome = { raw: t('advanced.skipped'), score: 0 };
+    } else {
+      try {
+        outcome = await signal.detect();
+      } catch {
+        outcome = { raw: '—', score: 0 };
+      }
     }
+
+    readings.set(signal.id, outcome);
     const contribution = Math.round(outcome.score * signal.weight);
     const verdict = signalVerdict(outcome.score);
     total += contribution;
 
     if (row) {
-      const val = q('[data-field="value"]', row);
-      const contrib = q('[data-field="contribution"]', row);
+      const value = q('[data-field="value"]', row);
+      const contributionEl = q('[data-field="contribution"]', row);
       const dot = q('[data-field="dot"]', row);
-      if (val) val.textContent = outcome.raw;
-      if (contrib) contrib.textContent = `+${contribution}`;
+      if (value) value.textContent = outcome.raw;
+      if (contributionEl) {
+        contributionEl.textContent = signal.weight > 0 ? `+${contribution}` : t('ui.contextOnly');
+      }
       if (dot) dot.className = `dot dot--${verdict}`;
       row.classList.remove('is-active');
       row.classList.add('is-done');
@@ -415,23 +427,22 @@ async function run() {
     }
 
     setRing(Math.min(100, total));
-    if (verdict !== 'low') hits.push({ signal, contribution });
+    if (signal.weight > 0 && verdict !== 'low') hits.push({ signal, contribution });
     await delay(SETTLE_MS);
   }
 
+  summarizeHypotheses(readings);
+  summarizeEdgeContext(await edgePromise, readings);
   finalize(Math.min(100, total), hits);
+
   const label = q('#retest-label');
   if (label) label.textContent = t('ui.retest');
-  if (btn) btn.disabled = false;
+  if (button) button.disabled = false;
   running = false;
 }
 
-/**
- * No auto-run: the mascot dozes until the user hits "Start scan",
- * then it wakes up and hunts for signals.
- */
 function init() {
-  q('#retest')?.addEventListener('click', () => run());
+  q('#retest')?.addEventListener('click', () => void run());
   initShare();
   initApiCopy();
   initLangMemory();

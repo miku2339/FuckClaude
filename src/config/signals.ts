@@ -1,5 +1,7 @@
 /**
- * Signal definitions + weighting for the "China user" risk score.
+ * Signal definitions + weighting for an experimental environment-resemblance
+ * score. This is not an Anthropic classifier and must never be presented as
+ * one. Evidence tiers keep third-party reports separate from QIM hypotheses.
  *
  * This module is isomorphic: the `detect()` functions touch browser APIs
  * (document / navigator / Intl) but are ONLY invoked on the client from
@@ -25,12 +27,16 @@ export interface DetectOutcome {
   score: number;
 }
 
+export type EvidenceTier = 'officialData' | 'hypothesis' | 'context';
+
 export interface SignalDef {
   id: SignalId;
-  /** Scoring weight; all weights sum to 100. */
+  /** Scoring weight. Weighted signals sum to 100; context-only signals use 0. */
   weight: number;
-  /** True when Claude Code's real mechanism actually reads this signal. */
-  claudeUsed?: boolean;
+  /** Strength of the public evidence behind including this browser signal. */
+  evidence: EvidenceTier;
+  /** Requires an extra privacy opt-in (for example canvas or STUN probing). */
+  intrusive?: boolean;
   /** Inline SVG icon markup. */
   icon: string;
   /** Sync or async (e.g. userAgentData high-entropy values) detector. */
@@ -159,7 +165,7 @@ function getTimezone(): string {
   }
 }
 
-/** Pure timezone scoring, reused server-side against the Vercel geo timezone. */
+/** Pure timezone scoring, reused server-side against Cloudflare geo timezone. */
 export function scoreTimezone(tz: string): number {
   if (CLAUDE_TIMEZONES.includes(tz) || CN_TIMEZONES.includes(tz)) return 1;
   if (GREATER_CN_TIMEZONES.includes(tz)) return 0.6;
@@ -429,16 +435,26 @@ const ICON = {
 };
 
 export const SIGNALS: SignalDef[] = [
-  { id: 'timezone', weight: 24, claudeUsed: true, icon: ICON.clock, detect: detectTimezone },
-  { id: 'language', weight: 18, icon: ICON.globe, detect: detectLanguage },
-  { id: 'fonts', weight: 14, icon: ICON.type, detect: detectFonts },
-  { id: 'vendorFonts', weight: 10, icon: ICON.typeBox, detect: detectVendorFonts },
-  { id: 'webrtcLeak', weight: 10, icon: ICON.shield, detect: detectWebrtcLeak },
-  { id: 'cnBrowser', weight: 8, icon: ICON.compass, detect: detectCnBrowser },
-  { id: 'deviceVendor', weight: 6, icon: ICON.phone, detect: detectDeviceVendor },
-  { id: 'intlLocale', weight: 4, icon: ICON.sliders, detect: detectIntlLocale },
-  { id: 'timezoneOffset', weight: 3, icon: ICON.clockOffset, detect: detectTimezoneOffset },
-  { id: 'emoji', weight: 3, icon: ICON.smile, detect: detectEmoji },
+  // Anthropic's privacy policy explicitly lists timezone as collected data. It
+  // does not publish an enforcement mapping or threshold for this field.
+  { id: 'timezone', weight: 40, evidence: 'officialData', icon: ICON.clock, detect: detectTimezone },
+
+  // These weighted values form QIM's transparent local correlation model.
+  { id: 'language', weight: 30, evidence: 'hypothesis', icon: ICON.globe, detect: detectLanguage },
+  { id: 'intlLocale', weight: 20, evidence: 'hypothesis', icon: ICON.sliders, detect: detectIntlLocale },
+  { id: 'timezoneOffset', weight: 10, evidence: 'hypothesis', icon: ICON.clockOffset, detect: detectTimezoneOffset },
+
+  // Anthropic discloses browser/OS information as a data category, but not the
+  // regional matching implemented here. These remain zero-weight context.
+  { id: 'cnBrowser', weight: 0, evidence: 'officialData', icon: ICON.compass, detect: detectCnBrowser },
+  { id: 'deviceVendor', weight: 0, evidence: 'officialData', icon: ICON.phone, detect: detectDeviceVendor },
+  { id: 'emoji', weight: 0, evidence: 'context', icon: ICON.smile, detect: detectEmoji },
+
+  // Canvas font probing and WebRTC/STUN are off by default and never affect the
+  // score. Users must opt in before these context checks run.
+  { id: 'fonts', weight: 0, evidence: 'context', intrusive: true, icon: ICON.type, detect: detectFonts },
+  { id: 'vendorFonts', weight: 0, evidence: 'context', intrusive: true, icon: ICON.typeBox, detect: detectVendorFonts },
+  { id: 'webrtcLeak', weight: 0, evidence: 'context', intrusive: true, icon: ICON.shield, detect: detectWebrtcLeak },
 ];
 
 export type RiskBand = 'low' | 'medium' | 'high';

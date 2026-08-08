@@ -1,9 +1,12 @@
 # build output
 dist/
-# vercel adapter build output
-.vercel/
+# Cloudflare local state
+.wrangler/
 # generated types
 .astro/
+# browser QA artifacts
+.playwright-cli/
+output/
 
 # dependencies
 node_modules/
@@ -15,8 +18,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 # environment variables
-.env
-.env.production
+.env*
+!.env.example
 
 # macOS
 .DS_Store

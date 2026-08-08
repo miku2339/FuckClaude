@@ -1,11 +1,11 @@
 /**
- * Server-side "China user" estimate, reachable over curl / HTTP.
+ * Server-side environment-context estimate, reachable over curl / HTTP.
  *
  * The in-browser scan reads OS-level signals (timezone, fonts, Intl locale, …)
  * that a plain HTTP request can't see. This endpoint instead estimates the risk
- * from what Vercel exposes about the request:
- *   - `x-vercel-ip-timezone` — IANA timezone of the requester's IP (the big one)
- *   - `x-vercel-ip-country`   — country of the requester's IP
+ * from what Cloudflare exposes on the trusted inbound `request.cf` object:
+ *   - `request.cf.timezone` — IANA timezone of the requester's IP (the big one)
+ *   - `request.cf.country`  — country of the requester's IP
  *   - `accept-language`       — browser/UA language preferences
  *   - `user-agent`            — OS/vendor guess for the emoji signal
  *
@@ -21,8 +21,8 @@
  *   - `?format=text` forces the report even for JSON clients
  *   - `?lang=zh` / `?lang=en` (default: Accept-Language) → localised output
  *
- * Needs the Vercel adapter + on-demand rendering; geo headers are only present
- * on a real Vercel deployment (absent locally / on other hosts).
+ * Needs the Cloudflare adapter + on-demand rendering. Cloudflare geo metadata
+ * is absent in local preview, where those signals are reported as unmeasured.
  */
 import type { APIRoute } from 'astro';
 import {
@@ -40,13 +40,30 @@ import { useTranslations, type Lang } from '../../i18n/ui';
 
 export const prerender = false;
 
-const SITE = 'https://fuck-claude.vercel.app';
+const SITE = 'https://fuckclaude.qimake.com';
 
 const CORS: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': SITE,
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
+
+const COMMON_HEADERS: Record<string, string> = {
+  ...CORS,
+  'Cross-Origin-Resource-Policy': 'cross-origin',
+  'Referrer-Policy': 'no-referrer',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Robots-Tag': 'noindex',
+};
+
+interface CloudflareRequest extends Request {
+  cf?: {
+    country?: string | null;
+    timezone?: string;
+    asn?: number;
+    asOrganization?: string;
+  };
+}
 
 interface SignalResult {
   id: SignalId;
@@ -64,15 +81,22 @@ interface Analysis {
   measuredWeight: number;
   totalWeight: number;
   rawContribution: number;
-  geo: { country: string | null; timezone: string | null };
+  geo: {
+    country: string | null;
+    timezone: string | null;
+    asn: number | null;
+    asOrganization: string | null;
+  };
   signals: SignalResult[];
 }
 
 function parseAcceptLanguage(header: string): string[] {
   return header
+    .slice(0, 512)
     .split(',')
     .map((part) => part.split(';')[0].trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 16);
 }
 
 /** Minutes east of UTC for an IANA timezone (Asia/Shanghai → 480), or null. */
@@ -136,10 +160,13 @@ function wantsColor(url: URL, req: Request): boolean {
 
 function analyze(req: Request, lang: Lang): Analysis {
   const t = useTranslations(lang);
-  const tz = req.headers.get('x-vercel-ip-timezone') || '';
-  const country = req.headers.get('x-vercel-ip-country') || '';
+  const cf = (req as CloudflareRequest).cf;
+  const tz = cf?.timezone || '';
+  const country = cf?.country || '';
+  const asn = typeof cf?.asn === 'number' ? cf.asn : null;
+  const asOrganization = cf?.asOrganization || null;
   const acceptLang = parseAcceptLanguage(req.headers.get('accept-language') || '');
-  const ua = req.headers.get('user-agent') || '';
+  const ua = (req.headers.get('user-agent') || '').slice(0, 1024);
 
   const offsetEast = tzOffsetEastMinutes(tz);
   const emoji = scoreEmojiVendor(ua);
@@ -147,13 +174,21 @@ function analyze(req: Request, lang: Lang): Analysis {
   const cnDevice = scoreCnDevice(ua);
 
   const measured: Partial<Record<SignalId, { value: string; score: number }>> = {
-    timezone: { value: tz || 'unknown', score: scoreTimezone(tz) },
     language: { value: acceptLang.join(', ') || 'unknown', score: scoreLanguages(acceptLang) },
     cnBrowser: { value: cnBrowser.name ?? 'none detected', score: cnBrowser.score },
     deviceVendor: { value: cnDevice.name ?? 'none detected', score: cnDevice.score },
-    timezoneOffset: { value: fmtOffset(offsetEast), score: offsetEast === 480 ? 0.7 : 0 },
     emoji: { value: `${emoji.vendor} style`, score: emoji.score },
   };
+
+  if (tz) {
+    measured.timezone = { value: tz, score: scoreTimezone(tz) };
+  }
+  if (offsetEast !== null) {
+    measured.timezoneOffset = {
+      value: fmtOffset(offsetEast),
+      score: offsetEast === 480 ? 0.7 : 0,
+    };
+  }
 
   let rawContribution = 0;
   let measuredWeight = 0;
@@ -195,7 +230,12 @@ function analyze(req: Request, lang: Lang): Analysis {
     measuredWeight,
     totalWeight,
     rawContribution,
-    geo: { country: country || null, timezone: tz || null },
+    geo: {
+      country: country || null,
+      timezone: tz || null,
+      asn,
+      asOrganization,
+    },
     signals,
   };
 }
@@ -203,8 +243,9 @@ function analyze(req: Request, lang: Lang): Analysis {
 function jsonBody(a: Analysis, lang: Lang) {
   const t = useTranslations(lang);
   return {
-    app: 'Fuck Claude',
+    app: 'QIM Developer Signal Lab',
     estimate: true,
+    officialAnthropicDecision: false,
     lang,
     score: a.score,
     band: a.band,
@@ -215,8 +256,8 @@ function jsonBody(a: Analysis, lang: Lang) {
     signals: a.signals,
     note:
       lang === 'zh'
-        ? '基于 IP 归属地与请求头的服务端估算,与浏览器端读取操作系统的检测结果可能不同;中文字体、厂商字体、Intl locale 与 WebRTC 泄露只能在浏览器里检测。'
-        : 'Server-side estimate from IP geo + request headers; it can differ from the in-browser OS scan. Chinese fonts, vendor fonts, Intl locale and WebRTC leaks can only be measured in a browser.',
+        ? 'QIM 的服务端环境估算,基于 Cloudflare 附加的 IP 衍生地区/网络资料与请求头。它不是 Anthropic 的决定,也可能与 Claude Code 的实际出口不同。'
+        : 'QIM server-side environment estimate from Cloudflare IP-derived region/network metadata and request headers. It is not an Anthropic decision and can differ from the actual Claude Code egress.',
     docs: lang === 'zh' ? `${SITE}/zh/` : `${SITE}/`,
   };
 }
@@ -226,7 +267,7 @@ function textBody(a: Analysis, lang: Lang, color: boolean): string {
 
   // Minimal ANSI painter — a no-op when colour is disabled (browsers/pipes).
   const paint = (open: string) => (s: string) => (color ? `\x1b[${open}m${s}\x1b[0m` : s);
-  const accent = paint('38;5;173'); // Claude's warm orange (#d7875f)
+  const accent = paint('38;5;43'); // QIM teal
   const dim = paint('38;5;245'); // muted grey
   const bold = paint('1');
   const bandColor = { low: paint('38;5;71'), medium: paint('38;5;178'), high: paint('38;5;167') }[
@@ -236,28 +277,28 @@ function textBody(a: Analysis, lang: Lang, color: boolean): string {
   const L =
     lang === 'zh'
       ? {
-          subtitle: '「Claude 中国用户」检测',
-          tagline: '基于 IP 归属地 + 请求头的服务端估算',
-          score: '风险分',
+          subtitle: '开发者信号实验室',
+          tagline: 'QIM 环境背景估算 · 非 Anthropic 判断',
+          score: '实验分',
           measured: '服务端可见信号',
           browserOnly: '仅浏览器可测(curl 看不到)',
           coverage: '覆盖',
           geo: '归属地',
-          noteBody: 'IP/请求头估算,与浏览器端系统检测结果可能不同。',
+          noteBody: '只作环境研究参考,且可能不同于 Claude Code 实际出口。',
           full: '完整检测',
           hintJson: 'JSON      → 加 ?format=json',
           hintLang: '语言      → 自动跟随 Accept-Language',
           none: '无',
         }
       : {
-          subtitle: 'Claude "China user" check',
-          tagline: 'Server-side estimate from IP geo + request headers',
-          score: 'Score',
+          subtitle: 'Developer Signal Lab',
+          tagline: 'QIM environment context · not an Anthropic decision',
+          score: 'Experimental score',
           measured: 'Signals visible server-side',
           browserOnly: 'Browser-only (invisible to curl)',
           coverage: 'Coverage',
           geo: 'Geo',
-          noteBody: 'IP/header estimate; differs from the in-browser OS scan.',
+          noteBody: 'Research context only; it can differ from actual Claude Code egress.',
           full: 'Full scan',
           hintJson: 'JSON      → add ?format=json',
           hintLang: 'Language  → follows Accept-Language',
@@ -265,7 +306,12 @@ function textBody(a: Analysis, lang: Lang, color: boolean): string {
         };
 
   const home = lang === 'zh' ? `${SITE}/zh/` : `${SITE}/`;
-  const geoStr = [a.geo.country, a.geo.timezone].filter(Boolean).join(' · ') || L.none;
+  const geoStr = [
+    a.geo.country,
+    a.geo.timezone,
+    a.geo.asn ? `AS${a.geo.asn}` : null,
+    a.geo.asOrganization,
+  ].filter(Boolean).join(' · ') || L.none;
   const browserOnly =
     a.signals
       .filter((s) => !s.measured)
@@ -281,7 +327,7 @@ function textBody(a: Analysis, lang: Lang, color: boolean): string {
 
   const out: string[] = [];
   out.push(rule('╭'));
-  out.push(`${bar}  ${accent(bold('Fuck Claude'))}  ${dim(L.subtitle)}`);
+  out.push(`${bar}  ${accent(bold('QIM'))}  ${dim(L.subtitle)}`);
   out.push(`${bar}  ${dim(L.tagline)}`);
   out.push(bar);
   out.push(
@@ -324,7 +370,7 @@ export const GET: APIRoute = ({ request, url }) => {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-store',
         Vary: vary,
-        ...CORS,
+        ...COMMON_HEADERS,
       },
     });
   }
@@ -335,9 +381,10 @@ export const GET: APIRoute = ({ request, url }) => {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
       Vary: vary,
-      ...CORS,
+      ...COMMON_HEADERS,
     },
   });
 };
 
-export const OPTIONS: APIRoute = () => new Response(null, { status: 204, headers: CORS });
+export const OPTIONS: APIRoute = () =>
+  new Response(null, { status: 204, headers: COMMON_HEADERS });

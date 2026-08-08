@@ -1,64 +1,75 @@
 /**
- * Generates the site's visual assets (Claude palette + middle-finger mark):
- *   public/favicon.svg          – orange tile + white middle finger
- *   public/apple-touch-icon.png – 180×180, square (iOS applies its own mask)
- *   public/icon-192.png / icon-512.png – PWA/manifest icons
- *   public/og.png               – 1200×630 Open Graph card
+ * Generates the QIM-branded favicon, PWA icons, and Open Graph artwork.
+ * The paths mirror the canonical qim-logo.svg used by qimake.com.
  *
  * Run: node scripts/gen-assets.mjs
  */
 import sharp from 'sharp';
 import { writeFile } from 'node:fs/promises';
 
-const ORANGE = '#D97757'; // Claude terracotta
-const CREAM = '#FAF9F5'; // ivory
-const BONE = '#F0EEE6';
-const SLATE = '#1F1E1D';
-const MUTED = '#63615B';
-const FAINT = '#8A887F';
+const INK = '#0B1220';
+const INK_2 = '#172033';
+const WHITE = '#FFFFFF';
+const TEAL = '#39C5BB';
+const TEAL_DARK = '#20A99F';
+const YELLOW = '#F5DF4D';
+const MUTED = '#A8B4C4';
 
-/**
- * Stylized middle-finger hand (raised middle finger, folded knuckles, thumb),
- * drawn inside a 64×64 box. Kept as overlapping rounded rects so it stays
- * crisp at favicon sizes.
- */
-function hand(color) {
-  return `<g fill="${color}">
-    <rect x="26.9" y="8" width="7.6" height="29" rx="3.8"/>
-    <rect x="18.9" y="24.5" width="6.4" height="11" rx="3.2"/>
-    <rect x="36.1" y="24.5" width="6.4" height="11" rx="3.2"/>
-    <rect x="16.9" y="30" width="27.6" height="24" rx="9"/>
-    <rect x="40.6" y="32.5" width="7.6" height="16" rx="3.8" transform="rotate(-24 44.4 40.5)"/>
+function qimLogo(color = WHITE) {
+  return `<g>
+    <circle cx="16" cy="18" r="10" stroke="${color}" stroke-width="8" fill="none"/>
+    <path d="M24 18v14" stroke="${color}" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="24" cy="34" r="2.5" fill="${TEAL}"/>
+    <circle cx="46" cy="11" r="4" fill="${YELLOW}"/>
+    <path d="M46 18v14" stroke="${color}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M66 32V21c0-3.866 3.134-7 7-7s7 3.134 7 7v11" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M80 32V21c0-3.866 3.134-7 7-7s7 3.134 7 7v11" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   </g>`;
 }
 
-function tileSvg(rx) {
+function iconSvg(radius) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="${rx}" fill="${ORANGE}"/>
-  ${hand(CREAM)}
-</svg>`;
+    <rect width="64" height="64" rx="${radius}" fill="${INK}"/>
+    <circle cx="28" cy="28" r="12" stroke="${WHITE}" stroke-width="8" fill="none"/>
+    <path d="M36 28v18" stroke="${WHITE}" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="37" cy="49" r="3.5" fill="${TEAL}"/>
+    <circle cx="49" cy="15" r="5" fill="${YELLOW}"/>
+  </svg>`;
 }
 
-const OG_HAND_SCALE = 4.6;
+const logoScale = 2.15;
 const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="${CREAM}"/>
-  <circle cx="280" cy="315" r="205" fill="${BONE}"/>
-  <g transform="translate(${(280 - 32 * OG_HAND_SCALE).toFixed(1)} ${(315 - 32 * OG_HAND_SCALE).toFixed(1)}) scale(${OG_HAND_SCALE})">${hand(ORANGE)}</g>
-  <text x="530" y="190" font-family="Helvetica, Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="8" fill="${ORANGE}">FUCK CLAUDE</text>
-  <text x="525" y="280" font-family="Georgia, 'Times New Roman', serif" font-size="70" font-weight="700" fill="${SLATE}">Are you a Claude</text>
-  <text x="525" y="370" font-family="Georgia, 'Times New Roman', serif" font-size="70" font-weight="700" font-style="italic" fill="${ORANGE}">“China user”?</text>
-  <text x="530" y="442" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="${MUTED}">Timezone · Language · Fonts · Locale</text>
-  <text x="530" y="482" font-family="Helvetica, Arial, sans-serif" font-size="25" fill="${MUTED}">Checked 100% locally in your browser</text>
-  <text x="530" y="556" font-family="Menlo, monospace" font-size="23" fill="${FAINT}">fuck-claude.vercel.app</text>
+  <rect width="1200" height="630" fill="${INK}"/>
+  <path d="M0 470 380 90h250L190 630H0Z" fill="${INK_2}"/>
+  <path d="M760 0h440v630H560Z" fill="${TEAL_DARK}" opacity="0.09"/>
+  <g opacity="0.18" stroke="${WHITE}">
+    <path d="M0 88h1200M0 176h1200M0 264h1200M0 352h1200M0 440h1200M0 528h1200"/>
+    <path d="M88 0v630M176 0v630M264 0v630M352 0v630M440 0v630M528 0v630"/>
+  </g>
+  <g transform="translate(72 58) scale(${logoScale})">${qimLogo(WHITE)}</g>
+  <rect x="935" y="66" width="183" height="44" rx="9" fill="${YELLOW}"/>
+  <text x="1026" y="95" text-anchor="middle" font-family="Menlo, monospace" font-size="17" font-weight="700" fill="${INK}">PUBLIC INTEREST</text>
+  <text x="72" y="258" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="78" font-weight="750" fill="${WHITE}">Developer Signal Lab</text>
+  <text x="72" y="338" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="36" font-weight="600" fill="${TEAL}">Independent environment diagnostics</text>
+  <text x="72" y="399" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="26" fill="${MUTED}">Official policy · third-party reports · QIM hypotheses</text>
+  <g transform="translate(72 462)">
+    <rect width="260" height="46" rx="23" fill="none" stroke="${TEAL}"/>
+    <circle cx="27" cy="23" r="5" fill="${TEAL}"/>
+    <text x="46" y="31" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="20" fill="${WHITE}">Local scoring</text>
+    <rect x="276" width="275" height="46" rx="23" fill="none" stroke="${TEAL}"/>
+    <circle cx="303" cy="23" r="5" fill="${TEAL}"/>
+    <text x="322" y="31" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="20" fill="${WHITE}">No trackers or ads</text>
+  </g>
+  <text x="72" y="572" font-family="Menlo, monospace" font-size="21" fill="${MUTED}">fuckclaude.qimake.com · Not affiliated with Anthropic</text>
 </svg>`;
 
-const px = (svg, size) =>
+const rasterizeIcon = (svg, size) =>
   sharp(Buffer.from(svg), { density: 72 * (size / 64) }).resize(size, size);
 
-await writeFile('public/favicon.svg', tileSvg(14) + '\n');
-await px(tileSvg(0), 180).png().toFile('public/apple-touch-icon.png');
-await px(tileSvg(14), 192).png().toFile('public/icon-192.png');
-await px(tileSvg(14), 512).png().toFile('public/icon-512.png');
+await writeFile('public/favicon.svg', `${iconSvg(14)}\n`);
+await rasterizeIcon(iconSvg(0), 180).png().toFile('public/apple-touch-icon.png');
+await rasterizeIcon(iconSvg(14), 192).png().toFile('public/icon-192.png');
+await rasterizeIcon(iconSvg(14), 512).png().toFile('public/icon-512.png');
 await sharp(Buffer.from(ogSvg)).png().toFile('public/og.png');
 
-console.log('assets written to public/');
+console.log('QIM visual assets written to public/');
