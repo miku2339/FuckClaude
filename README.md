@@ -1,319 +1,116 @@
-# Fuck Claude — Are You a Claude "China User"?
+# QIM Developer Signal Lab
 
-English | [中文](#中文)
+QIM public-interest deployment of the open-source
+[`LinXiaoTao/FuckClaude`](https://github.com/LinXiaoTao/FuckClaude) project:
+<https://fuckclaude.qimake.com>.
 
-A lightweight, SEO-friendly, bilingual (EN / 中文) single-page tool that scans your
-**browser environment** and tells you whether Claude Code would flag you as a China
-user. One click runs an animated scan of each signal, the gauge climbs as risk adds
-up, and you get a verdict plus the list of matched signals. Everything runs **100%
-locally** — no network requests, no data upload.
+The product identity is **QIM Developer Signal Lab**. Claude and Claude Code are
+referenced only to identify the service being discussed. QIM is independent and
+is not affiliated with, endorsed by, or sponsored by Anthropic.
 
-Built with **Claude Fable 5**.
+## Purpose and evidence model
 
-## How it works
+This free tool helps developers inspect environment signals and evaluate public
+claims more critically. It separates three things that should not be conflated:
 
-When Claude Code is pointed at a non-official endpoint via `ANTHROPIC_BASE_URL`, it
-was reported to read the **system timezone** and the **proxy hostname**, then encode
-the result steganographically into the `Today's date is …` line of the system prompt
-(date separator `-` → `/` on a China timezone; the apostrophe swapped among four
-near-identical Unicode variants to encode domain-list / AI-lab-keyword hits).
+1. **Official policy and disclosed data categories** — Anthropic says it uses IP
+   plus other signals for rough location and lists data categories including
+   timezone, ISP/network, OS, browser, payment and identity information.
+2. **Third-party reports** — retained for provenance, but never described as an
+   Anthropic-confirmed implementation.
+3. **QIM hypotheses** — transparent locale and cross-signal correlations that
+   are experimental, separately labeled, and unable to predict account action.
 
-A web page can only read browser-visible signals. Crucially, `Intl` reads the **same
-OS timezone** Claude Code does, so timezone is the one signal that maps directly onto
-Claude's real check. The other signals are general "Chinese environment" fingerprints.
+Primary sources:
 
-## Sponsors
+- [Anthropic location disclosure](https://privacy.claude.com/en/articles/11186740-does-claude-use-my-location)
+- [Anthropic privacy policy](https://www.anthropic.com/legal/privacy)
+- [Anthropic supported countries and regions](https://www.anthropic.com/supported-countries)
+- [Claude Code data usage](https://code.claude.com/docs/en/data-usage)
 
-[Want to be listed below?](mailto:linxiaotao1993@gmail.com)
+No public source reveals Anthropic's complete signal mapping, weights, or
+enforcement threshold. A result from this site is not an Anthropic decision,
+account-eligibility conclusion, or guarantee against enforcement.
 
-| 🏆 Sponsors 🏆 | Introduction |
-| --- | --- |
-| <a href="https://roxybrowser.cn/invite/A4YZ2O"><img src="public/sponsors/roxy-wordmark.jpg" width="140" alt="Roxy Browser"></a> | **[Roxy Browser \| Multi-account farming & anti-ban](https://roxybrowser.cn/invite/A4YZ2O)** (10% off promo code)<br>Thanks to Roxy Browser for sponsoring this project! Built to bypass AI-platform risk-control checks: fully masks Canvas, WebGL and other low-level fingerprints, gives every account absolute physical isolation, and keeps batch account farming stable and ban-free. |
-| <a href="https://shop.aishop.chat/"><img src="public/sponsors/hanhui-wordmark.png" width="170" alt="瀚慧AI"></a> | **[瀚慧AI — Claude / GPT / Gemini subscriptions](https://shop.aishop.chat/)**<br>Thanks to 瀚慧AI for sponsoring this project! Overseas AI membership subscribe, renew & upgrade — reliable delivery with after-sales support, invoices available. Perfect for enterprises, universities & individuals. [Shop now](https://shop.aishop.chat/). |
-| <a href="https://nexsms.net/en/"><img src="public/sponsors/nexsms-wordmark-340x126.png" width="170" alt="NexSMS"></a> | **[NexSMS — Global SMS verification platform](https://nexsms.net/en/)**<br>Thanks to NexSMS for sponsoring this project! Instant SMS verification covering 200+ countries with 500k+ active numbers — no KYC, supports ChatGPT, Telegram, WhatsApp & 10k+ platforms. Real local SIM cards, developer-friendly API, pay-as-you-go. [Try free](https://nexsms.net/en/). |
-| <a href="https://agentearth.ai/r/9uZeeDqZ"><img src="public/sponsors/agentearth-wordmark-290x48.png" width="170" alt="AgentEarth"></a> | **[AgentEarth](https://agentearth.ai/r/9uZeeDqZ)**<br>Thanks to AgentEarth for sponsoring this project! Your agent needs tools that get things done right: AgentEarth puts 600+ plug-and-play external API tools — AI generation, web search, scraping, maps, weather, finance data and more — behind a single MCP endpoint. [Get started](https://agentearth.ai/r/9uZeeDqZ) today. |
-| <a href="https://www.energy-rent.work/"><img src="public/sponsors/flashrent-wordmark.png" width="170" alt="FlashRent"></a> | **[FlashRent — TRON Energy Rental](https://www.energy-rent.work/)**<br>Thanks to FlashRent for sponsoring this project! Save up to 80% on USDT transfer gas fees on TRON. Instant delegation without freezing TRX — supports single rentals, bulk orders, and Telegram bot integration. [Try free](https://www.energy-rent.work/). |
+## QIM changes
 
-## Detected signals & weights
+- Replaced the hostile/ambiguous product presentation with current QIM branding
+  and the canonical QIM logo used on `qimake.com`.
+- Removed CEO/weapon mascots, ads, analytics, sponsors, affiliate surfaces,
+  anti-detection guides, and evasion-oriented content from the deployed branch.
+- Added a visible evidence ledger, public-interest statement, non-affiliation
+  notice, privacy boundary, and bilingual use/liability terms.
+- Moved `/api/check` to Cloudflare Workers and added read-only Cloudflare
+  country, timezone, ASN, and network-organization context.
+- Kept the weighted browser score local. Canvas font and WebRTC/STUN checks are
+  optional, off by default, zero-weight, and disclosed before use.
+- Added QIM hypotheses for cross-signal consistency, regional software context,
+  and browser-versus-edge timezone mismatch. They never add points.
+- Preserved MIT attribution and direct links to the upstream project.
+- Added security headers and `no-transform` protection against automatic
+  analytics injection.
 
-| Signal | Weight | How it's detected |
-| --- | --- | --- |
-| System timezone | 24 | `Intl.DateTimeFormat().resolvedOptions().timeZone` vs. `Asia/Shanghai`, `Asia/Urumqi`, … (**used by Claude**) |
-| Browser language | 18 | `navigator.language(s)`; `zh-CN` / `zh-Hans` scores highest |
-| Installed Chinese fonts | 14 | Canvas width-probing for SC/TC fonts (Microsoft YaHei, PingFang SC, …) |
-| Chinese vendor fonts | 10 | Canvas probing for vendor/software faces (MiSans, HarmonyOS Sans, OPPO Sans, WPS Founder FZ\*, …) — any hit is a strong tell |
-| WebRTC IP leak | 10 | `RTCPeerConnection` ICE candidates via STUN — local / real public IP leaks |
-| Chinese browser / WebView | 8 | UA + UA-CH brands vs. WeChat, QQ, Quark, UC, Baidu, 360, Sogou, Douyin … |
-| Chinese-brand device | 6 | UA-CH high-entropy `model` (`navigator.userAgentData`) + UA vs. HarmonyOS, Huawei, Xiaomi, OPPO, vivo, … |
-| Intl locale | 4 | `Intl` resolved locale (date/number formatting) |
-| Timezone offset | 3 | `getTimezoneOffset() === -480` (UTC+8) |
-| Emoji rendering style | 3 | OS-vendor guess from platform/UA; weakly correlated |
+## Privacy
 
-Each signal returns a `0–1` "China-like" score, multiplied by its weight; the ten
-weights sum to **100**, so the total score is the sum of contributions. Bands: Low
-`0–30`, Medium `31–60`, High `61–100`. A signal counts as a "hit" when its score
-≥ 0.25.
+The application has no login, cookies, analytics, advertising, or scan-result
+storage. The local weighted values do not leave the browser. The edge-context
+card makes a same-origin GET and displays IP-derived metadata Cloudflare already
+processes while serving the site. Optional WebRTC testing may contact Google's
+public STUN service; ICE candidates remain in the browser.
 
-## Anti-Ban Guides
+## Provenance
 
-Bilingual knowledge base at [`/guides/`](https://fuck-claude.vercel.app/guides/)
-(English) and [`/zh/guides/`](https://fuck-claude.vercel.app/zh/guides/) (中文):
-Claude Code steganography, environment cleanup, registration & payment, API
-safety, appeal SOP, and domestic / open-source failover.
+- QIM fork: <https://github.com/miku233333/FuckClaude>
+- Upstream: <https://github.com/LinXiaoTao/FuckClaude>
+- QIM base commit: `f94bcc66e4a390e6c2b747768678db0f95e7d786`
+- Base archive SHA-256: `b4d8c85b7ca855b3179d422102c90e361be462b9b14e3ca2423b586ff9edc517`
+- License: MIT, © LinXiaoTao; QIM modifications retain the original notice.
 
-## Share & API
+Upstream was checked through `3aa684afb17b588cfe61ba8506522bf3116cc2fe` on
+2026-08-09. Its newer guide/sponsor changes were not merged because they do not
+update the detector and conflict with this deployment's evidence and privacy
+boundary.
 
-- **One-click share** — after a scan, share your verdict together with an
-  auto-generated result image via the native share sheet (Web Share API, so
-  mobile clients get their real app list), or straight to X, Weibo, Telegram,
-  Facebook, LinkedIn or Reddit, plus copy-to-clipboard. A **Save result image**
-  button also appears next to _Scan again_.
-- **curl / HTTP endpoint** — the site is static, but a tiny Vercel Function at
-  `/api/check` returns a server-side estimate for terminals and scripts. It
-  scores what the request exposes — the Vercel geo timezone
-  (`x-vercel-ip-timezone`), country, the `Accept-Language` header and the
-  User-Agent (emoji vendor + Chinese browser + Chinese device brand) — over
-  the measurable 62/100 of the weight (Chinese fonts, vendor fonts, Intl
-  locale and WebRTC leaks are browser-only) and normalises it to 0–100, reusing
-  the exact same scorers as the browser scan. The response language follows your
-  `Accept-Language` header automatically.
+## Local verification
 
 ```bash
-# Text report — replies in the language of your Accept-Language header
-curl https://fuck-claude.vercel.app/api/check
-
-# Force a language via the request header
-curl -H "Accept-Language: zh" https://fuck-claude.vercel.app/api/check
-
-# JSON
-curl "https://fuck-claude.vercel.app/api/check?format=json"
+pnpm install --frozen-lockfile
+pnpm check
+pnpm build
+pnpm exec wrangler deploy --dry-run -c wrangler.preview.jsonc
 ```
 
-> The API is an IP/header estimate and differs from the in-browser OS scan; the
-> geo headers only exist on the Vercel deployment.
+Requires Node `>=22.12.0` and pnpm `10.32.1`.
 
-## Tech stack
+## Staged deployment
 
-- [Astro](https://astro.build) `7.x`, static output (`output: 'static'`)
-- [`@astrojs/vercel`](https://docs.astro.build/en/guides/integrations-guide/vercel/)
-  adapter so the single on-demand route `/api/check` runs as a Vercel Function
-  (every page still prerenders to static HTML)
-- Built-in i18n: English at `/`, Chinese at `/zh/`, plus `@astrojs/sitemap`
-- No UI framework; the scan/scoring logic is a single bundled TypeScript module
-- Package manager: **pnpm**
-
-## Project structure
-
-```
-src/
-├── config/signals.ts    # signal definitions, weights, detectors, icons
-├── config/guides.ts     # anti-ban guide catalog (slug, category, summary)
-├── config/sponsors.ts   # sponsor list (logo, link, EN/ZH taglines)
-├── config/cn-models.ts  # domestic-model picks (DeepSeek / GLM / Kimi name-only links)
-├── config/socials.ts    # header social profiles (Xiaohongshu / Douyin / X) + QR payloads
-├── content/guidesData.ts # full bilingual guide article bodies
-├── i18n/ui.ts           # EN/ZH copy dictionary + translator
-├── scripts/detect.ts    # animated scan + scoring + verdict + share wiring (client)
-├── scripts/track.ts     # GA click tracking for outbound promo links
-├── layouts/BaseLayout.astro  # <head> SEO + GA + global styles
-├── components/          # Detector (+ share buttons), Sponsors, CnModels, ScoreRing, Mascot, LangToggle, SocialLinks (QR popovers), Footer
-└── pages/               # index.astro (en) + zh/index.astro + guides/ + zh/guides/ + api/check.ts
-public/mascot/           # cartoon CEO state images (doze / search / low / medium / high)
-public/sponsors/         # sponsor logos
-scripts/
-└── gen-assets.mjs       # regenerates favicon / PWA icons / og.png (node scripts/gen-assets.mjs)
-skills/
-└── detection-signals/SKILL.md  # agent playbook for adding/tuning detection signals
-```
-
-## Develop
+Build first, then deploy the preview Worker:
 
 ```bash
-pnpm install
-pnpm dev        # http://localhost:4321
-pnpm build      # -> dist/
-pnpm preview
+pnpm build
+pnpm exec wrangler deploy -c wrangler.preview.jsonc
 ```
 
-## Deploy
-
-Optimised for **Vercel** (`@astrojs/vercel`): every page prerenders to static
-HTML and only `/api/check` runs as a Vercel Function that reads the request's
-geo headers. It also works on any static host (Cloudflare Pages, Netlify,
-GitHub Pages) — the site is fully functional there, only the `/api/check`
-endpoint is Vercel-specific. Before deploying, set your real origin in
-[`astro.config.mjs`](astro.config.mjs) (`site`) and
-[`public/robots.txt`](public/robots.txt) so canonical URLs, `hreflang` links and the
-sitemap point to the correct domain.
-
-## Disclaimer
-
-For reference only, based on public reverse-engineering reports of Claude Code's
-former proxy-fingerprinting behaviour. Not an official statement or advice.
-
-## License
-
-Released under the [MIT License](LICENSE), © LinXiaoTao.
-
-You are free to use, modify and redistribute this project, **but any copy or
-substantial portion must keep the original copyright and license notice** (i.e.
-credit the original project [`LinXiaoTao/FuckClaude`](https://github.com/LinXiaoTao/FuckClaude)).
-If you redeploy it, please keep the footer credit / repo link so visitors can
-find the original project.
-
----
-
-<a id="中文"></a>
-
-# Fuck Claude — 你是「Claude 中国用户」吗
-
-[English](#fuck-claude--are-you-a-claude-china-user) | 中文
-
-一个轻量、SEO 友好、中英双语的单页工具:扫描你的**浏览器环境**,判断你是否会被
-Claude Code 标记为中国用户。点击后会有逐项检测的扫描动效,分数环随风险累加而增长,
-最后给出结论与命中的信号列表。所有检测都在**本地浏览器**完成——不发起任何网络请求,
-不上传任何数据。
-
-本网站使用 **Claude Fable 5** 开发。
-
-## 原理
-
-当 Claude Code 通过 `ANTHROPIC_BASE_URL` 指向非官方中转时,据公开逆向分析它会读取
-**系统时区**与**中转 hostname**,再把结果用隐写术编码进 system prompt 的
-`Today's date is …` 这一行(命中中国时区时日期分隔符 `-` 变 `/`;撇号在 4 种视觉几乎
-相同的 Unicode 变体间切换,编码是否命中域名清单 / AI 实验室关键词)。
-
-网页只能读取浏览器可见信号。关键在于:`Intl` 读到的时区与 Claude Code 读的是**同一个
-操作系统时区**,因此时区是唯一能直接对应 Claude 真实判定的信号;其余信号属于更广义的
-「中文环境指纹」。
-
-## 赞助商
-
-[想显示在下方？](mailto:linxiaotao1993@gmail.com)
-
-| 🏆 赞助商 🏆 | 介绍 |
-| --- | --- |
-| <a href="https://roxybrowser.cn/invite/A4YZ2O"><img src="public/sponsors/roxy-wordmark.jpg" width="140" alt="Roxy 浏览器"></a> | **[Roxy 浏览器 \| 养号&多账号防封号](https://roxybrowser.cn/invite/A4YZ2O)**(优惠码 9 折)<br>感谢 Roxy 浏览器 赞助本项目!专为绕过 AI 平台风控检测而生!完美屏蔽 Canvas、WebGL 等底层指纹,实现多账号绝对物理隔离,批量养号稳定防封。 |
-| <a href="https://agentearth.ai/r/9uZeeDqZ"><img src="public/sponsors/agentearth-wordmark-290x48.png" width="170" alt="AgentEarth"></a> | **[AgentEarth](https://agentearth.ai/r/9uZeeDqZ)**<br>感谢 AgentEarth 赞助本项目!你的智能体需要的是能把事情做对的工具:AgentEarth 把 600+ 即插即用的外部 API 工具——AI 生成、搜索、爬虫、地图、天气、金融数据等——汇聚在一个 MCP 接入点。欢迎[立即接入](https://agentearth.ai/r/9uZeeDqZ)。 |
-| <a href="https://nexsms.net/"><img src="public/sponsors/nexsms-wordmark-340x126.png" width="170" alt="NexSMS"></a> | **[NexSMS — 全球号码接码平台](https://nexsms.net/)**<br>感谢 NexSMS 赞助本项目!全球号码即刻接收验证码,覆盖 200+ 国家,50 万+ 活跃号码,无需 KYC,支持 ChatGPT / Telegram / WhatsApp 等上万种平台。实体本地卡号,开发者友好 API,按量计费。欢迎[免费体验](https://nexsms.net/)。 |
-| <a href="https://shop.aishop.chat/"><img src="public/sponsors/hanhui-wordmark.png" width="170" alt="瀚慧AI"></a> | **[瀚慧AI — Claude / GPT / Gemini 会员充值](https://shop.aishop.chat/)**<br>感谢瀚慧AI赞助本项目!Claude / GPT / Gemini 会员充值,正规可开票。海外 AI 会员订阅、续费、升级服务,稳定交付,售后跟进,企业/高校/个人更省心。欢迎[立即选购](https://shop.aishop.chat/)。 |
-| <a href="https://www.energy-rent.work/"><img src="public/sponsors/flashrent-wordmark.png" width="170" alt="FlashRent"></a> | **[FlashRent — 波场能量租用平台](https://www.energy-rent.work/)**<br>感谢 FlashRent 赞助本项目！波场 TRON 能量租用，USDT 转账手续费立省高达 80%。秒级到账，无需冻结 TRX，支持单笔租用、批量派发与 Telegram Bot 集成。欢迎[免费体验](https://www.energy-rent.work/)。 |
-
-## 检测信号与权重
-
-| 信号 | 权重 | 检测方式 |
-| --- | --- | --- |
-| 系统时区 | 24 | `Intl.DateTimeFormat().resolvedOptions().timeZone` 对比 `Asia/Shanghai`、`Asia/Urumqi` 等(**Claude 实际使用**) |
-| 浏览器语言 | 18 | `navigator.language(s)`;`zh-CN` / `zh-Hans` 得分最高 |
-| 已安装中文字体 | 14 | canvas 宽度探测简/繁体中文字体(微软雅黑、PingFang SC 等) |
-| 国产厂商字体 | 10 | canvas 探测厂商 / 软件字体(MiSans、鸿蒙黑体、OPPO Sans、WPS 方正 FZ\* 等),命中即强信号 |
-| WebRTC IP 泄露 | 10 | `RTCPeerConnection` 经 STUN 收集 ICE 候选,探测本机 / 真实公网 IP 泄露 |
-| 国产浏览器 / WebView | 8 | UA + UA-CH brands 匹配微信、QQ、夸克、UC、百度、360、搜狗、抖音等 |
-| 国产品牌设备 | 6 | UA-CH 高熵 `model`(`navigator.userAgentData`)+ UA 匹配鸿蒙、华为、小米、OPPO、vivo 等 |
-| Intl 区域设置 | 4 | `Intl` 解析出的 locale(日期 / 数字格式) |
-| 时区偏移 | 3 | `getTimezoneOffset() === -480`(UTC+8) |
-| Emoji 渲染风格 | 3 | 由平台 / UA 推断 OS 厂商,弱相关 |
-
-每个信号输出 `0–1` 的「中国相似度」,乘以权重;十项权重合计为 **100**,所以总分即各项
-贡献之和。分档:低 `0–30`、中 `31–60`、高 `61–100`。信号得分 ≥ 0.25 记为「命中」。
-
-> 台湾不在 Anthropic 的封禁名单内,因此 `Asia/Taipei` 时区与 `zh-TW` 语言 / locale
-> **不计分**;繁体中文字体只保留极低的模糊分(无法区分台湾与港澳)。香港、澳门
-> 属于受限地区,相关信号保留部分风险分。
-
-## 防封指南资料库
-
-中英双语资料库:[`/guides/`](https://fuck-claude.vercel.app/guides/)(英文)与
-[`/zh/guides/`](https://fuck-claude.vercel.app/zh/guides/)(中文),覆盖 Claude Code
-隐写原理、环境纯化、注册支付避坑、API 安全、申诉 SOP 与国产 / 开源灾备。
-
-## 分享与 API
-
-- **一键分享** —— 检测完成后,可连同自动生成的结果图片一起,通过系统原生分享面板
-  (Web Share API,移动端会弹出真实的应用列表)分享结论,或直达 X、微博、Telegram、
-  Facebook、LinkedIn、Reddit,以及复制链接。「重新扫描」按钮旁还会出现 **保存结果图片**。
-- **curl / HTTP 接口** —— 网站是静态的,但 `/api/check` 是一个极小的 Vercel Function,
-  为终端与脚本返回服务端估算。它基于请求可见的信息评分 —— Vercel 归属地时区
-  (`x-vercel-ip-timezone`)、国家、`Accept-Language` 头与 User-Agent(emoji 厂商 +
-  国产浏览器 + 国产品牌设备)—— 在可检测的 62/100 权重上(中文字体、厂商字体、
-  Intl locale 与 WebRTC 泄露仅浏览器可测)归一化到 0–100,复用与浏览器扫描完全一致的评分器。
-  响应语言会自动跟随你的 `Accept-Language` 请求头。
+After browser, API, headers, and asset checks pass, deploy production using the
+Astro-generated Cloudflare configuration:
 
 ```bash
-# 纯文本报告 —— 语言自动跟随 Accept-Language 请求头
-curl https://fuck-claude.vercel.app/api/check
-
-# 通过请求头指定语言
-curl -H "Accept-Language: zh" https://fuck-claude.vercel.app/api/check
-
-# JSON
-curl "https://fuck-claude.vercel.app/api/check?format=json"
+pnpm exec wrangler deploy
 ```
 
-> 该接口是基于 IP / 请求头的估算,与浏览器端读取操作系统的检测结果不同;geo 头仅在
-> Vercel 部署上存在。
+## Use and responsibility
 
-## 技术栈
+Provided "as is" for research and reference. QIM makes no promise of accuracy,
+completeness, continuous availability, maintenance, support, updates, or fitness
+for a particular purpose. Users must follow applicable law and service terms;
+this tool does not provide or encourage bypassing regional, identity, or
+security controls. To the maximum extent permitted by applicable law, QIM is
+not liable for loss arising from use or reliance. Nothing excludes liability
+that cannot legally be excluded.
 
-- [Astro](https://astro.build) `7.x`,静态输出(`output: 'static'`)
-- [`@astrojs/vercel`](https://docs.astro.build/en/guides/integrations-guide/vercel/)
-  适配器,让唯一的按需路由 `/api/check` 作为 Vercel Function 运行(其余页面仍全部
-  预渲染为静态 HTML)
-- 内置 i18n:英文在 `/`,中文在 `/zh/`,并使用 `@astrojs/sitemap`
-- 不依赖任何 UI 框架;扫描 / 打分逻辑是单个打包的 TypeScript 模块
-- 包管理器:**pnpm**
+## 中文摘要
 
-## 目录结构
-
-```
-src/
-├── config/signals.ts    # 信号定义、权重、检测函数、图标
-├── config/guides.ts     # 防封指南目录(slug、分类、摘要)
-├── config/sponsors.ts   # 赞助商列表(logo、链接、中英文案)
-├── config/cn-models.ts  # 国产模型推荐(DeepSeek / GLM / Kimi 纯文字链接)
-├── config/socials.ts    # 头部社交主页(小红书 / 抖音 / X)+ 二维码内容
-├── content/guidesData.ts # 防封指南双语正文
-├── i18n/ui.ts           # 中英文案字典 + 取值 helper
-├── scripts/detect.ts    # 扫描动效 + 打分 + 结论 + 分享逻辑(客户端)
-├── scripts/track.ts     # 出站推广链接的 GA 点击埋点
-├── layouts/BaseLayout.astro  # <head> SEO + GA + 全局样式
-├── components/          # Detector(含分享按钮)、Sponsors、CnModels、ScoreRing、Mascot、LangToggle、SocialLinks(二维码浮层)、Footer
-└── pages/               # index.astro(英)+ zh/index.astro + guides/ + zh/guides/ + api/check.ts
-public/mascot/           # 卡通 CEO 各状态图(打瞌睡 / 检测中 / 低 / 中 / 高风险)
-public/sponsors/         # 赞助商 logo
-scripts/
-└── gen-assets.mjs       # 重新生成 favicon / PWA 图标 / og.png(node scripts/gen-assets.mjs)
-skills/
-└── detection-signals/SKILL.md  # 新增 / 调整检测信号的 agent 操作手册
-```
-
-## 本地开发
-
-```bash
-pnpm install
-pnpm dev        # http://localhost:4321
-pnpm build      # 产物在 dist/
-pnpm preview
-```
-
-## 部署
-
-针对 **Vercel** 优化(`@astrojs/vercel`):所有页面都会预渲染为静态 HTML,只有
-`/api/check` 作为 Vercel Function 运行以读取请求的 geo 头。它同样支持任意静态托管
-(Cloudflare Pages、Netlify、GitHub Pages)—— 网站在这些平台上完全可用,只有
-`/api/check` 接口是 Vercel 特有的。部署前请把 [`astro.config.mjs`](astro.config.mjs) 的
-`site` 和 [`public/robots.txt`](public/robots.txt) 换成你的真实域名,以保证 canonical、
-`hreflang` 与 sitemap 指向正确。
-
-## 免责声明
-
-本工具仅供参考,基于对 Claude Code 早期中转指纹行为的公开逆向分析,不构成任何官方结论
-或建议。
-
-## 开源协议
-
-基于 [MIT 协议](LICENSE) 开源,© LinXiaoTao。
-
-你可以自由使用、修改与再分发本项目,**但任何副本或实质性部分都必须保留原始的版权与许可
-声明**(即注明来自原项目 [`LinXiaoTao/FuckClaude`](https://github.com/LinXiaoTao/FuckClaude))。
-若你重新部署,请保留页脚署名 / 仓库链接,方便访问者找到原项目。
+這是 QIM 為開發者提供的公益環境訊號自查工具。官方政策、第三方報告與 QIM 假設分開
+展示；結果不代表 Anthropic 的判斷，也不能預測帳號處置。網站不設登入、分析、廣告或
+結果儲存；canvas 字體及 WebRTC 測試預設關閉、須主動啟用且不計分。工具按現狀提供，
+不承諾維護、支援、持續可用或特定用途適用性，亦不提供繞過地區、身份或安全限制的方法。

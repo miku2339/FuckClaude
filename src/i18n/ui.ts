@@ -1,6 +1,6 @@
 /**
- * Bilingual (English / Simplified-Chinese) copy for the whole site.
- * Isomorphic + framework-free so the client detect script can import it too.
+ * Bilingual copy for the independent QIM developer signal lab.
+ * Kept framework-free because the browser detector and the edge API both use it.
  */
 
 export const languages = {
@@ -13,127 +13,183 @@ export const defaultLang: Lang = 'en';
 
 export const ui = {
   en: {
-    'meta.title': 'Fuck Claude | Are You a Claude "China User"?',
+    'meta.title': 'QIM Developer Signal Lab | Independent Claude Environment Check',
     'meta.description':
-      'One-click check of your browser timezone, language, Chinese fonts and locale to see if Claude Code would flag you as a China user. 100% local, nothing uploaded.',
+      'A free, independent QIM public-interest tool that makes browser and network-region signals visible. Experimental results are not an Anthropic decision.',
 
-    'nav.title': 'Fuck Claude',
-    'nav.guides': 'Anti-Ban Guides',
-    'nav.home': 'Home',
-    'credit': 'Built with Claude Fable 5',
+    'nav.title': 'QIM Developer Signal Lab',
+    'nav.product': 'Developer Signal Lab',
+    'nav.evidence': 'Evidence',
+    'nav.method': 'Method',
+    'nav.about': 'About QIM',
+    'credit': 'Independent research tool · not affiliated with Anthropic',
 
-    'guides.title': 'Claude Anti-Ban & Safety Knowledge Base',
-    'guides.sub':
-      'In-depth guides on Anthropic risk mechanisms, OS/browser environment cleanup, payment safety, API safety, and appeal SOPs.',
-    'guides.readMore': 'Read Guide',
-    'guides.back': '← Back to Knowledge Base',
-    'guides.backHome': '← Back to Home',
-
-    'hero.title': 'Are you a Claude “China user”?',
-    'hero.badge.local': '100% local scan',
-    'hero.badge.noUpload': 'Results never uploaded',
-    'hero.badge.openSource': 'Open source',
+    'hero.eyebrow': 'A QIM public-interest developer project',
+    'hero.title': 'See the environment signals your tools can expose.',
+    'hero.lead':
+      'Run a transparent, on-device check of regional browser signals. We show what is observed, what is only reported, and what remains a QIM research hypothesis.',
+    'hero.notice':
+      'This is an experimental environment-resemblance score—not an Anthropic risk score, account verdict, or way to predict enforcement.',
+    'hero.affiliation':
+      'Claude and Claude Code are trademarks of Anthropic, PBC. QIM is independent and is not affiliated with, endorsed by, or sponsored by Anthropic.',
+    'hero.badge.local': 'Local scoring',
+    'hero.badge.noUpload': 'No trackers or ads',
+    'hero.badge.openSource': 'Open source · MIT',
     'hero.scoreOutOf': '/ 100',
+    'score.label': 'Experimental resemblance score',
 
-    'sponsors.label': 'Sponsors',
-    'sponsors.cta': 'Want to be listed here?',
-
-    'cnModels.label': 'Chinese AI models',
-    'cnModels.slogan': 'Chinese models are simply better',
-
-    'band.low.title': 'Low risk',
-    'band.low.desc': '🐶You are not a “Claude China user”🐶',
-    'band.medium.title': 'Medium risk',
-    'band.medium.desc': '🐶You are probably a “Claude China user”🐶',
-    'band.high.title': 'High risk',
-    'band.high.desc': '🐶You are definitely a “Claude China user”🐶',
-    'band.high.extra': 'But you still have',
+    'band.low.title': 'Few matching signals',
+    'band.low.desc': 'Your browser showed few of the locally tested regional signals.',
+    'band.medium.title': 'Mixed signal cluster',
+    'band.medium.desc': 'Several browser signals matched, but this is not an identity or account conclusion.',
+    'band.high.title': 'Strong signal cluster',
+    'band.high.desc': 'Many local signals matched. This still does not show what Anthropic will decide.',
+    'band.high.extra': 'Additional context',
     'band.high.extraSep': ', ',
     'band.high.extraSepLast': ' and ',
 
     'signal.timezone.name': 'System timezone',
     'signal.timezone.desc':
-      'Intl.DateTimeFormat exposes the same OS timezone Claude Code reads; compared against Asia/Shanghai, Asia/Urumqi and other China zones.',
+      'Reads the IANA timezone exposed by Intl.DateTimeFormat. Anthropic discloses timezone as a collected data category, but publishes no enforcement mapping or threshold.',
     'signal.language.name': 'Browser language',
     'signal.language.desc':
-      'navigator.languages — zh-CN / Simplified Chinese at the top of the list scores highest.',
+      'Reads navigator.languages. Language preference describes an environment, not a person, location, or account eligibility.',
     'signal.fonts.name': 'Installed Chinese fonts',
     'signal.fonts.desc':
-      'Canvas width-probing for Simplified / Traditional Chinese fonts such as Microsoft YaHei and PingFang SC.',
-    'signal.vendorFonts.name': 'Chinese vendor fonts',
+      'Uses local canvas width comparisons to look for common Simplified and Traditional Chinese fonts.',
+    'signal.vendorFonts.name': 'Regional software fonts',
     'signal.vendorFonts.desc':
-      'Canvas probing for fonts shipped by Chinese vendors or software — MiSans, HarmonyOS Sans, OPPO Sans, WPS Founder faces. Any hit is a strong tell.',
-    'signal.cnBrowser.name': 'Chinese browser / WebView',
+      'Looks for fonts distributed with selected device vendors and Chinese-language software. This is only a correlation hypothesis.',
+    'signal.cnBrowser.name': 'Browser or in-app WebView',
     'signal.cnBrowser.desc':
-      'User agent and UA-CH brands matched against WeChat, QQ, Quark, UC, Baidu and other Chinese browsers or in-app WebViews.',
-    'signal.deviceVendor.name': 'Chinese-brand device',
+      'Checks browser-provided user-agent brands for selected regional browsers and app WebViews.',
+    'signal.deviceVendor.name': 'Device vendor context',
     'signal.deviceVendor.desc':
-      'UA-CH device model (navigator.userAgentData) and UA matched against HarmonyOS, Huawei, Xiaomi, OPPO, vivo and other Chinese brands.',
+      'Checks browser-provided device model hints for selected vendors. Global device sales make this an uncertain signal.',
     'signal.intlLocale.name': 'Intl locale',
-    'signal.intlLocale.desc':
-      'The locale your browser resolves for date and number formatting.',
-    'signal.timezoneOffset.name': 'Timezone offset',
-    'signal.timezoneOffset.desc': 'Whether getTimezoneOffset() equals UTC+8.',
-    'signal.webrtcLeak.name': 'WebRTC IP leak',
+    'signal.intlLocale.desc': 'Reads the locale used by the browser for date and number formatting.',
+    'signal.timezoneOffset.name': 'UTC offset',
+    'signal.timezoneOffset.desc': 'Compares the current local offset with UTC+8; many regions share this offset.',
+    'signal.webrtcLeak.name': 'WebRTC exposure',
     'signal.webrtcLeak.desc':
-      'RTCPeerConnection probing for local or real public IP candidate leaks through STUN.',
-    'signal.emoji.name': 'Emoji rendering style',
+      'Checks whether ICE candidates expose an address. This is privacy context only and does not change the score.',
+    'signal.emoji.name': 'OS rendering context',
     'signal.emoji.desc':
-      'OS vendor guessed from the user agent; a weak, loosely correlated signal.',
+      'Makes a coarse OS-family guess from browser headers. It is shown as context only and does not change the score.',
 
     'scan.detecting': 'Checking',
     'scan.ready': 'Ready to scan',
-    'result.hitsTitle': 'Matched signals',
-    'result.noHits': 'No strong China signals matched. Low risk.',
+    'result.hitsTitle': 'Weighted signals observed',
+    'result.noHits': 'No weighted signal crossed the match threshold.',
+    'signals.title': 'Local signal scan',
+    'signals.sub':
+      'Four transparent locale signals form the experimental score; six browser, device, canvas, and network checks are zero-weight context.',
 
-    'signals.title': 'What gets scanned',
-    'signals.sub': 'Ten locale & network fingerprints, weighted to a 0–100 risk score.',
+    'advanced.title': 'Include optional canvas and WebRTC checks',
+    'advanced.body':
+      'Off by default. If enabled, canvas checks local fonts and WebRTC may contact Google’s public STUN server. Neither affects the score.',
+    'advanced.badge': 'Opt-in only',
+    'advanced.skipped': 'not run (opt-in off)',
 
-    'how.title': 'How the check works',
+    'evidence.title': 'Evidence, without the guesswork',
+    'evidence.sub':
+      'The interface keeps official policy, third-party reporting, and QIM hypotheses in separate lanes.',
+    'evidence.policy.title': 'Official policy',
+    'evidence.policy.body':
+      'Anthropic says it uses IP plus other signals for rough location, lists supported regions, and discloses data categories including timezone, ISP, OS, browser, payment, and identity information. It does not publish its complete enforcement classifier.',
+    'evidence.policy.link': 'Anthropic supported regions',
+    'evidence.location.link': 'Anthropic location disclosure',
+    'evidence.privacy.link': 'Anthropic privacy policy',
+    'evidence.report.title': 'Third-party report',
+    'evidence.report.body':
+      'The upstream project reports a Claude Code timezone/custom-endpoint mechanism. QIM has not found an Anthropic statement confirming the exact implementation.',
+    'evidence.report.link': 'Review the upstream source',
+    'evidence.hypothesis.title': 'QIM hypothesis layer',
+    'evidence.hypothesis.body':
+      'Language, fonts, browser, device, locale, and cross-signal clusters are transparent research hypotheses—not claims about Anthropic internals.',
+
+    'hypotheses.title': 'Experimental hypothesis lab',
+    'hypotheses.sub':
+      'These interpretations update after a scan but never add points to the headline score.',
+    'hypotheses.cluster.title': 'Cross-signal consistency',
+    'hypotheses.cluster.body':
+      'Checks whether timezone, language, locale, and UTC offset point in a similar direction.',
+    'hypotheses.software.title': 'Regional software footprint',
+    'hypotheses.software.body':
+      'Combines font, browser/WebView, and device-vendor observations into a separate context flag.',
+    'hypotheses.network.title': 'Edge network context',
+    'hypotheses.network.body':
+      'Shows the country code, timezone, and network organization Cloudflare attaches to this same-origin request. It is policy context, not proof of an Anthropic check.',
+    'hypotheses.pending': 'Waiting for scan',
+    'hypotheses.none': 'No cluster observed',
+    'hypotheses.mixed': 'Mixed evidence',
+    'hypotheses.observed': 'Cluster observed',
+    'hypotheses.unavailable': 'Unavailable',
+    'hypotheses.context': 'Context only',
+    'hypotheses.footnote':
+      'Important: this page sees the connection used to load QIM, not necessarily the egress used by Claude Code. No public source reveals Anthropic’s signal weights or enforcement threshold.',
+    'network.timezoneDiff': 'browser and edge timezones differ',
+    'network.timezoneMatch': 'browser and edge timezones align',
+    'network.unlistedFocus': 'CN/HK/MO not listed by Anthropic · checked 2026-08-09',
+    'network.listedTaiwan': 'Taiwan listed by Anthropic · checked 2026-08-09',
+    'network.verifyList': 'verify eligibility on the current official list',
+
+    'account.title': 'Signals this page cannot inspect',
+    'account.sub':
+      'Current Anthropic materials describe account-side checks that a public webpage cannot read. They stay out of the automated score.',
+    'account.manual': 'MANUAL / NOT COLLECTED',
+    'account.phone.title': 'Verified phone region',
+    'account.phone.body':
+      'New accounts require a supported-region phone number. QIM cannot read your Claude account or verified number.',
+    'account.billing.title': 'Billing source and address',
+    'account.billing.body':
+      'Payment-source country and billing-address matching are account-side information and are never requested here.',
+    'account.identity.title': 'Identity verification',
+    'account.identity.body':
+      'Persona document or selfie verification, when required, is private account data outside this tool’s scope.',
+    'account.egress.title': 'Actual Claude Code egress',
+    'account.egress.body':
+      'Claude Code may use a corporate proxy or VPN, so its network path can differ from the browser connection shown here.',
+
+    'how.title': 'How to read this result',
     'how.p1':
-      'When Claude Code is pointed at a proxy endpoint via ANTHROPIC_BASE_URL, public reverse-engineering reports found it reads your operating-system timezone and the proxy hostname, then hides the verdict inside the system prompt with Unicode steganography — the date separator and four look-alike apostrophes in the “Today’s date” line encode whether you look like a China user.',
+      'The browser scan runs after you press Start. Each signal is visible, weighted, and labeled by evidence tier. The score measures resemblance to a hand-built environment profile; it does not identify nationality, residence, or account status.',
     'how.p2':
-      'A web page cannot read everything Claude Code can, but the key signal is identical: this tool reads the same OS timezone, then adds nine more browser-visible fingerprints — UI language, Chinese fonts, Chinese vendor fonts, WebRTC IP leaks, Chinese browsers, device brand, Intl locale, UTC+8 offset and emoji style — into a weighted score. Signals scoring ≥0.25 count as hits; bands are Low 0–30, Medium 31–60, High 61–100.',
-    'ui.weight': 'Weight',
+      'A same-origin GET to the edge API displays Cloudflare country/timezone metadata already present when serving the page. No scan result, font list, or WebRTC candidate is sent to QIM. The app stores no result and loads no analytics, ads, or third-party fonts.',
 
-    'faq.title': 'FAQ',
-    'faq.q1': 'Does Claude really check my timezone?',
+    'faq.title': 'Questions worth asking',
+    'faq.q1': 'Has Anthropic confirmed this exact detector?',
     'faq.a1':
-      'According to public reverse-engineering reports, when Claude Code talks to a non-official endpoint it reads the OS timezone and proxy hostname, and steganographically encodes the result into its system prompt. The timezone this page reads via Intl.DateTimeFormat is the very same OS timezone.',
-    'faq.q2': 'Is this score the exact check Claude runs?',
+      'No. Anthropic publishes region-availability rules, but QIM found no official source documenting this site’s ten-signal model. The timezone/custom-endpoint claim is a third-party report; the remaining correlations are labeled QIM hypotheses.',
+    'faq.q2': 'Can a low score guarantee account access or safety?',
     'faq.a2':
-      'No. Only the system timezone maps one-to-one onto Claude’s reported mechanism. The other nine signals are common Chinese-environment or network fingerprints that correlate with it, so treat the score as an estimate, not a verdict.',
-    'faq.q3': 'How do I lower my score?',
+      'No. A low score cannot guarantee access, prevent suspension, or predict any platform decision. Account, billing, network, abuse, and other server-side information are outside this page’s view.',
+    'faq.q3': 'Is this a bypass or anti-ban tool?',
     'faq.a3':
-      'Switch your OS timezone away from China zones such as Asia/Shanghai, move zh-CN off the top of your browser language list, block WebRTC leaks, and avoid routing Claude Code through proxies whose hostnames contain flagged domains or AI-lab keywords.',
-    'faq.q4': 'Is any data uploaded?',
+      'No. It is a transparency and self-check tool. It does not change your device, account, network, or endpoint and does not recommend evading platform restrictions.',
+    'faq.q4': 'What data leaves my browser?',
     'faq.a4':
-      'No. Every check runs locally in your browser and none of the detected signals are ever sent anywhere. The site only loads standard Google Analytics for anonymous page-view stats. (WebRTC leak detection may briefly contact a public STUN server to gather ICE candidates.)',
+      'The weighted scan stays local. The edge-context card makes a same-origin GET that receives normal IP-derived country/timezone metadata; the app does not store it. The WebRTC check may briefly contact Google’s public STUN server, and candidates remain local.',
 
-    'privacy.title': 'Privacy',
+    'privacy.title': 'Privacy boundary',
     'privacy.body':
-      'Every check runs locally in your browser — your scan results never leave your device. The site only loads Google Analytics for anonymous page-view stats; none of the detected signals are ever sent. WebRTC leak detection may briefly contact a public STUN server.',
+      'No analytics, advertising, cookies, account login, or result storage. Local scan values stay in the browser. Edge country/timezone comes from the request already handled by Cloudflare; WebRTC may contact Google STUN only while scanning.',
 
-    'social.x': 'X (Twitter)',
-    'social.xiaohongshu': 'Xiaohongshu (RED)',
-    'social.douyin': 'Douyin',
-    'social.jike': 'Jike',
-    'social.scan': 'Scan with the app, or click to open',
+    'public.title': 'Built as a QIM public-interest project',
+    'public.body':
+      'QIM provides this free tool to help developers inspect their environment and evaluate public claims more critically. It is independent, open source, and not affiliated with, endorsed by, or sponsored by Anthropic or Claude.',
+    'public.disclaimer.title': 'Use and responsibility',
+    'public.disclaimer.body':
+      'Provided “as is” for research and reference. QIM makes no promise of accuracy, completeness, continuous availability, maintenance, support, updates, or fitness for a particular purpose. Users must follow applicable law and service terms; this tool does not provide or encourage bypassing regional, identity, or security controls. Users remain responsible for their decisions. To the maximum extent permitted by law, QIM is not liable for loss arising from use or reliance; nothing excludes liability that cannot legally be excluded.',
 
-    'footer.disclaimer':
-      'For reference only, based on public reverse-engineering reports. Not an official statement or advice.',
-    'footer.license':
-      'Open sourced under the MIT License — redistributions must keep the original project notice.',
-    'footer.repo': 'Original project',
-
-    'share.label': 'Share your result',
+    'share.label': 'Share this experimental result',
     'share.native': 'Share',
     'share.copy': 'Copy link',
-    'share.copied': 'Copied!',
+    'share.copied': 'Copied',
     'share.save': 'Save result image',
-    'share.saved': 'Saved!',
+    'share.saved': 'Saved',
     'share.text':
-      'I scored {score}/100 on the “Am I a Claude China User?” test — {verdict}! 🐶 Check yours:',
+      'My QIM experimental environment-resemblance score is {score}/100 — {verdict}. This is not an Anthropic verdict:',
     'share.to.x': 'Share on X',
     'share.to.weibo': 'Share on Weibo',
     'share.to.telegram': 'Share on Telegram',
@@ -141,133 +197,209 @@ export const ui = {
     'share.to.linkedin': 'Share on LinkedIn',
     'share.to.reddit': 'Share on Reddit',
 
-    'api.title': 'Also available over curl',
+    'api.title': 'Edge context over curl',
     'api.desc':
-      'Prefer the terminal? Hit the endpoint below — it estimates your risk from your IP geo + request headers, and replies in the language of your Accept-Language header.',
-    'api.ex1': '# Text report — follows your Accept-Language',
-    'api.ex2': '# Force a language via header',
-    'api.ex3': '# JSON output',
+      'The read-only endpoint shows IP-derived country/timezone and request-header context. It is an estimate, returns no account data, and is not an Anthropic service.',
+    'api.ex1': '# Text report — follows Accept-Language',
+    'api.ex2': '# Force Chinese output',
+    'api.ex3': '# Structured JSON output',
 
-    'ui.claudeBadge': 'Claude Same',
+    'ui.weight': 'Weight',
+    'ui.contextOnly': 'Context only',
+    'ui.evidence.officialData': 'Officially disclosed data category',
+    'ui.evidence.reported': 'Third-party reported',
+    'ui.evidence.hypothesis': 'QIM hypothesis',
+    'ui.evidence.context': 'Zero-weight context',
+    'ui.claudeBadge': 'Third-party reported',
     'ui.retest': 'Scan again',
-    'ui.start': 'Start scan',
+    'ui.start': 'Start local scan',
+
+    'footer.disclaimer':
+      'Independent QIM research project. Experimental output only; not an Anthropic or Claude decision.',
+    'footer.license': 'MIT licensed. Original-project attribution retained.',
+    'footer.qim': 'QIM',
+    'footer.fork': 'QIM fork',
+    'footer.repo': 'Upstream project',
+    'footer.trademark':
+      'Claude and Anthropic names belong to their respective owner. Their use here identifies the service being discussed and does not imply affiliation.',
+
+    // Compatibility copy for currently unused upstream components.
+    'sponsors.label': 'Sponsors',
+    'sponsors.cta': 'Learn more',
+    'cnModels.label': 'Other models',
+    'cnModels.slogan': 'Explore alternatives',
+    'social.x': 'X',
+    'social.xiaohongshu': 'Xiaohongshu',
+    'social.douyin': 'Douyin',
+    'social.jike': 'Jike',
+    'social.scan': 'Open',
   },
 
   zh: {
-    'meta.title': 'Fuck Claude ｜ 你是「Claude 中国用户」吗',
+    'meta.title': 'QIM 开发者信号实验室｜独立 Claude 环境自查',
     'meta.description':
-      '一键检测浏览器时区、语言、中文字体与 locale 等信号,评估你是否会被 Claude Code 判定为中国用户并有封号风险。纯本地运行,零数据上传。',
+      'QIM 免费公益开发者工具，透明展示浏览器与网络区域信号。实验结果不代表 Anthropic 的判断。',
 
-    'nav.title': 'Fuck Claude',
-    'nav.guides': '防封指南',
-    'nav.home': '首页',
-    'credit': '此网站使用 Claude Fable 5 开发',
+    'nav.title': 'QIM 开发者信号实验室',
+    'nav.product': '开发者信号实验室',
+    'nav.evidence': '证据说明',
+    'nav.method': '检测方法',
+    'nav.about': '关于 QIM',
+    'credit': '独立研究工具 · 与 Anthropic 无关联',
 
-    'guides.title': 'Claude 防封避坑与环境纯化资料库',
-    'guides.sub':
-      '全方位拆解 Anthropic 风控原理、操作系统与浏览器环境纯化、注册支付避坑、API 中转规范及英文申诉 SOP。',
-    'guides.readMore': '阅读全文',
-    'guides.back': '← 返回资料库',
-    'guides.backHome': '← 返回首页',
-
-    'hero.title': '你是「Claude 中国用户」吗',
-    'hero.badge.local': '纯本地检测',
-    'hero.badge.noUpload': '结果零上传',
-    'hero.badge.openSource': '开源代码',
+    'hero.eyebrow': 'QIM 公益开发者项目',
+    'hero.title': '看清开发工具可能暴露的环境信号。',
+    'hero.lead':
+      '在设备本地透明检查区域相关浏览器信号，并明确区分：实际观测、第三方报告与 QIM 研究假设。',
+    'hero.notice':
+      '这是实验性的「环境相似度」分数，不是 Anthropic 风险分、账号结论，也不能预测平台执法。',
+    'hero.affiliation':
+      'Claude 与 Claude Code 是 Anthropic, PBC 的商标。QIM 为独立项目，与 Anthropic 没有隶属、认可、赞助或背书关系。',
+    'hero.badge.local': '本地计分',
+    'hero.badge.noUpload': '无分析与广告',
+    'hero.badge.openSource': '开源 · MIT',
     'hero.scoreOutOf': '/ 100',
+    'score.label': '实验性环境相似度',
 
-    'sponsors.label': '赞助商',
-    'sponsors.cta': '想显示在下方？',
-
-    'cnModels.label': '国产大模型',
-    'cnModels.slogan': '模型还是中国的好',
-
-    'band.low.title': '低风险',
-    'band.low.desc': '🐶你不是「Claude 中国用户」🐶',
-    'band.medium.title': '中等风险',
-    'band.medium.desc': '🐶你可能是「Claude 中国用户」🐶',
-    'band.high.title': '高风险',
-    'band.high.desc': '🐶你绝对是「Claude 中国用户」🐶',
-    'band.high.extra': '但是你还有',
+    'band.low.title': '少量匹配信号',
+    'band.low.desc': '浏览器只显示少量本地测试的区域相关信号。',
+    'band.medium.title': '混合信号组合',
+    'band.medium.desc': '有多项浏览器信号匹配，但这不是身份或账号结论。',
+    'band.high.title': '明显信号组合',
+    'band.high.desc': '多项本地信号匹配，但仍不能代表 Anthropic 会如何判断。',
+    'band.high.extra': '补充信息',
     'band.high.extraSep': '、',
     'band.high.extraSepLast': ' 和 ',
 
     'signal.timezone.name': '系统时区',
     'signal.timezone.desc':
-      'Intl.DateTimeFormat 读到的就是 Claude Code 读取的同一个系统时区,与 Asia/Shanghai、Asia/Urumqi 等中国时区比对。',
+      '读取 Intl.DateTimeFormat 暴露的 IANA 时区。Anthropic 披露会收集时区这一数据类别，但没有公开执法映射或门槛。',
     'signal.language.name': '浏览器语言',
-    'signal.language.desc': '检查 navigator.languages;首选 zh-CN / 简体中文得分最高。',
+    'signal.language.desc':
+      '读取 navigator.languages。语言偏好只能描述环境，不能证明个人身份、所在地或账号资格。',
     'signal.fonts.name': '已安装中文字体',
-    'signal.fonts.desc': '用 canvas 宽度探测微软雅黑、苹方等简繁中文字体。',
-    'signal.vendorFonts.name': '国产厂商字体',
+    'signal.fonts.desc': '通过本地 canvas 宽度比较，查找常见简体与繁体中文字体。',
+    'signal.vendorFonts.name': '区域软件字体',
     'signal.vendorFonts.desc':
-      '用 canvas 探测 MiSans、鸿蒙黑体、OPPO Sans、WPS 方正字体等国产厂商 / 软件字体,命中即为强信号。',
-    'signal.cnBrowser.name': '国产浏览器 / WebView',
-    'signal.cnBrowser.desc':
-      '用 UA 与 UA-CH brands 匹配微信、QQ、夸克、UC、百度等国产浏览器或应用内 WebView。',
-    'signal.deviceVendor.name': '国产品牌设备',
+      '查找部分设备厂商及中文软件附带的字体；这只是相关性假设。',
+    'signal.cnBrowser.name': '浏览器或应用 WebView',
+    'signal.cnBrowser.desc': '从浏览器提供的 UA 品牌信息识别部分区域浏览器与应用内 WebView。',
+    'signal.deviceVendor.name': '设备厂商信息',
     'signal.deviceVendor.desc':
-      '用 UA-CH 设备型号(navigator.userAgentData)与 UA 匹配鸿蒙、华为、小米、OPPO、vivo 等国产品牌。',
+      '从浏览器提供的设备型号提示识别部分厂商；设备全球销售使该信号存在明显不确定性。',
     'signal.intlLocale.name': 'Intl 区域设置',
-    'signal.intlLocale.desc': '浏览器用于日期 / 数字格式化的 locale。',
-    'signal.timezoneOffset.name': '时区偏移',
-    'signal.timezoneOffset.desc': 'getTimezoneOffset() 是否为 UTC+8。',
-    'signal.webrtcLeak.name': 'WebRTC IP 泄露',
+    'signal.intlLocale.desc': '读取浏览器用于日期及数字格式化的 locale。',
+    'signal.timezoneOffset.name': 'UTC 偏移',
+    'signal.timezoneOffset.desc': '比较当前本地偏移是否为 UTC+8；许多地区共用此偏移。',
+    'signal.webrtcLeak.name': 'WebRTC 暴露面',
     'signal.webrtcLeak.desc':
-      '探测浏览器 RTCPeerConnection 是否通过 STUN 服务泄露真实内网或公网 IP。',
-    'signal.emoji.name': 'Emoji 渲染风格',
-    'signal.emoji.desc': '由 UA 推断操作系统厂商,弱相关信号。',
+      '检查 ICE candidate 是否暴露地址。只作隐私背景信息，不影响分数。',
+    'signal.emoji.name': '系统渲染背景',
+    'signal.emoji.desc': '从浏览器标头粗略推测系统类别；只作背景信息，不影响分数。',
 
     'scan.detecting': '检测中',
-    'scan.ready': '待检测',
-    'result.hitsTitle': '命中的信号',
-    'result.noHits': '没有命中明显的中国信号,风险较低。',
+    'scan.ready': '等待检测',
+    'result.hitsTitle': '观测到的加权信号',
+    'result.noHits': '没有加权信号超过匹配门槛。',
+    'signals.title': '本地信号扫描',
+    'signals.sub': '四项透明的 locale 信号构成实验分数；另外六项浏览器、设备、canvas 与网络检查权重为零。',
 
-    'signals.title': '检测哪些信号',
-    'signals.sub': '十项区域与网络指纹,加权得出 0–100 风险分。',
+    'advanced.title': '加入可选的 canvas 与 WebRTC 检查',
+    'advanced.body':
+      '默认关闭。启用后，canvas 会检查本地字体，WebRTC 可能连接 Google 公共 STUN；两者均不影响分数。',
+    'advanced.badge': '须主动启用',
+    'advanced.skipped': '未运行（未启用）',
 
-    'how.title': '检测原理',
+    'evidence.title': '把证据与猜测分开',
+    'evidence.sub': '官方政策、第三方报告与 QIM 假设分别展示，不混为一谈。',
+    'evidence.policy.title': '官方政策',
+    'evidence.policy.body':
+      'Anthropic 表示会用 IP 加其他信号估算大致位置，并公开支持地区；其政策亦列出时区、ISP、系统、浏览器、付款及身份资料等类别，但没有公开完整风控分类器。',
+    'evidence.policy.link': 'Anthropic 支持地区',
+    'evidence.location.link': 'Anthropic 位置资料说明',
+    'evidence.privacy.link': 'Anthropic 隐私政策',
+    'evidence.report.title': '第三方报告',
+    'evidence.report.body':
+      '上游项目报告了 Claude Code 的时区／自定义端点机制；QIM 未找到 Anthropic 对该具体实现的公开确认。',
+    'evidence.report.link': '查看上游来源',
+    'evidence.hypothesis.title': 'QIM 假设层',
+    'evidence.hypothesis.body':
+      '语言、字体、浏览器、设备、locale 与组合信号都是透明的研究假设，并非对 Anthropic 内部机制的断言。',
+
+    'hypotheses.title': '实验性假设区',
+    'hypotheses.sub': '扫描后会更新这些解释，但它们不会给主分数额外加分。',
+    'hypotheses.cluster.title': '跨信号一致性',
+    'hypotheses.cluster.body': '查看时区、语言、locale 与 UTC 偏移是否指向相近环境。',
+    'hypotheses.software.title': '区域软件痕迹',
+    'hypotheses.software.body': '把字体、浏览器／WebView 与设备厂商观测合并成独立背景标记。',
+    'hypotheses.network.title': '边缘网络背景',
+    'hypotheses.network.body':
+      '显示 Cloudflare 附加到同源请求的国家代码、时区与网络机构；这是政策背景，不是 Anthropic 检查的证据。',
+    'hypotheses.pending': '等待扫描',
+    'hypotheses.none': '未见组合信号',
+    'hypotheses.mixed': '证据混合',
+    'hypotheses.observed': '见到组合信号',
+    'hypotheses.unavailable': '无法取得',
+    'hypotheses.context': '仅作背景',
+    'hypotheses.footnote':
+      '注意：本站看到的是加载 QIM 的连接，不一定等于 Claude Code 的实际出口。公开资料没有 Anthropic 的信号权重或处置门槛。',
+    'network.timezoneDiff': '浏览器与边缘时区不同',
+    'network.timezoneMatch': '浏览器与边缘时区一致',
+    'network.unlistedFocus': '中／港／澳未列入 Anthropic 名单 · 核对于 2026-08-09',
+    'network.listedTaiwan': '台湾列入 Anthropic 名单 · 核对于 2026-08-09',
+    'network.verifyList': '请以最新官方名单核对资格',
+
+    'account.title': '网页无法检查的信号',
+    'account.sub': 'Anthropic 最新资料还描述了账号侧检查；公共网页无法读取，因此不会放进自动分数。',
+    'account.manual': '人工核对／本站不收集',
+    'account.phone.title': '已验证电话号码地区',
+    'account.phone.body': '新账号须使用受支持地区号码；QIM 无法读取 Claude 账号或已验证号码。',
+    'account.billing.title': '付款来源与账单地址',
+    'account.billing.body': '付款来源国家及账单地址匹配属于账号侧资料，本站不会要求提供。',
+    'account.identity.title': '身份验证',
+    'account.identity.body': 'Persona 证件或自拍验证（如适用）属于私密账号资料，不在本工具范围内。',
+    'account.egress.title': 'Claude Code 实际出口',
+    'account.egress.body': 'Claude Code 可使用企业代理或 VPN，实际网络路径可能与本站显示的浏览器连接不同。',
+
+    'how.title': '如何理解结果',
     'how.p1':
-      '当 Claude Code 通过 ANTHROPIC_BASE_URL 指向中转端点时,据公开逆向分析,它会读取操作系统时区与中转 hostname,再把结果用 Unicode 隐写术藏进 system prompt:「Today’s date」那一行的日期分隔符和 4 种几乎一样的撇号变体,编码了你是否像中国用户。',
+      '点击开始后才会运行浏览器扫描。每项信号都会显示数值、权重和证据级别。分数只表示与人工环境画像的相似度，不能识别国籍、居住地或账号状态。',
     'how.p2':
-      '网页读不到 Claude Code 能读的全部信息,但关键信号完全一致:本工具读取同一个系统时区,再叠加浏览器语言、中文字体、国产厂商字体、WebRTC IP 泄露、国产浏览器、设备品牌、Intl locale、UTC+8 偏移与 emoji 风格九项指纹,加权得分。得分 ≥0.25 计为命中;分档:低 0–30、中 31–60、高 61–100。',
-    'ui.weight': '权重',
+      '同源 GET 会显示 Cloudflare 在提供本页时已有的国家／时区元数据。扫描结果、字体清单与 WebRTC candidate 不会发给 QIM；应用不保存结果，也不加载分析、广告或第三方字体。',
 
-    'faq.title': '常见问题',
-    'faq.q1': 'Claude 真的会检查我的时区吗?',
+    'faq.title': '值得先问的问题',
+    'faq.q1': 'Anthropic 确认过这套检测吗？',
     'faq.a1':
-      '据公开逆向分析,Claude Code 连接非官方端点时会读取系统时区与中转 hostname,并把结果隐写进 system prompt。本页通过 Intl.DateTimeFormat 读到的,正是同一个系统时区。',
-    'faq.q2': '这个分数就是 Claude 的真实判定吗?',
+      '没有。Anthropic 公开了地区可用性规则，但 QIM 没有找到官方来源说明本站这套十项模型。时区／自定义端点属于第三方报告，其余相关性均标为 QIM 假设。',
+    'faq.q2': '低分能保证账号可用或安全吗？',
     'faq.a2':
-      '不是。只有系统时区能与 Claude 被披露的机制一一对应,其余九项是与之相关的「中文环境 / 网络指纹」。分数是估计,不是定论。',
-    'faq.q3': '怎么降低分数?',
+      '不能。低分无法保证可访问、避免停权或预测平台决定。账号、支付、网络、滥用及其他服务端信息都不在网页可见范围内。',
+    'faq.q3': '这是绕过限制或“防封”工具吗？',
     'faq.a3':
-      '把系统时区改出 Asia/Shanghai 等中国时区,把 zh-CN 从浏览器语言列表首位移除,禁用 WebRTC 泄露,并避免让 Claude Code 走 hostname 含敏感域名 / AI 实验室关键词的中转。',
-    'faq.q4': '会上传我的数据吗?',
+      '不是。这是透明度与环境自查工具，不会修改设备、账号、网络或端点，也不建议规避平台限制。',
+    'faq.q4': '哪些数据会离开浏览器？',
     'faq.a4':
-      '不会。所有检测都在浏览器本地完成,检测到的任何信号都不会被发送。网站仅加载 Google Analytics 统计匿名访问量。(WebRTC 泄露检测可能短暂连接公共 STUN 服务器以收集 ICE 候选。)',
+      '加权扫描留在本地。边缘背景卡会发出同源 GET，只接收正常请求已有的 IP 衍生国家／时区元数据，应用不作保存。WebRTC 检查可能短暂连接 Google 公共 STUN，candidate 仍留在本地。',
 
-    'privacy.title': '隐私说明',
+    'privacy.title': '隐私边界',
     'privacy.body':
-      '所有检测都在你的浏览器本地完成,扫描结果不会离开你的设备。网站仅加载 Google Analytics 统计匿名页面访问量,检测到的信号不会被发送。WebRTC 泄露检测可能短暂连接公共 STUN 服务器。',
+      '无分析、广告、Cookie、账号登录或结果存储。本地扫描值留在浏览器；边缘国家／时区来自 Cloudflare 已处理的请求；WebRTC 只在扫描时可能连接 Google STUN。',
 
-    'social.x': 'X(推特)',
-    'social.xiaohongshu': '小红书',
-    'social.douyin': '抖音',
-    'social.jike': '即刻',
-    'social.scan': '用 App 扫码关注,或点击直达',
+    'public.title': 'QIM 公益项目，为开发者而做',
+    'public.body':
+      'QIM 免费提供本工具，帮助开发者检查环境，并更审慎地评估公开说法。项目独立、开源，与 Anthropic 或 Claude 没有隶属、认可或赞助关系。',
+    'public.disclaimer.title': '使用与责任',
+    'public.disclaimer.body':
+      '本工具按「现状」提供，仅供研究与参考。QIM 不保证准确、完整、持续可用、维护、支援、更新或适合特定用途。使用者须遵守适用法律与服务条款；本工具不提供或鼓励绕过地区、身份或安全限制的方法。使用者须自行判断并对决定负责；在适用法律允许的最大范围内，QIM 不对因使用或依赖本工具产生的损失负责。法律不能排除的责任不受本声明影响。',
 
-    'footer.disclaimer': '本工具仅供参考,基于公开逆向分析,不构成任何官方结论或建议。',
-    'footer.license': '基于 MIT 协议开源 —— 二次发布请保留原项目署名。',
-    'footer.repo': 'GitHub 原项目',
-
-    'share.label': '分享你的结果',
+    'share.label': '分享实验结果',
     'share.native': '分享',
     'share.copy': '复制链接',
-    'share.copied': '已复制！',
+    'share.copied': '已复制',
     'share.save': '保存结果图片',
-    'share.saved': '已保存！',
-    'share.text': '我在「你是 Claude 中国用户吗」测试里得了 {score}/100 —— {verdict}！🐶 快来测测你的:',
+    'share.saved': '已保存',
+    'share.text':
+      '我的 QIM 实验性环境相似度为 {score}/100 —— {verdict}。这不是 Anthropic 的结论：',
     'share.to.x': '分享到 X',
     'share.to.weibo': '分享到微博',
     'share.to.telegram': '分享到 Telegram',
@@ -275,16 +407,40 @@ export const ui = {
     'share.to.linkedin': '分享到 LinkedIn',
     'share.to.reddit': '分享到 Reddit',
 
-    'api.title': '也支持 curl 命令行',
+    'api.title': '通过 curl 查看边缘背景',
     'api.desc':
-      '喜欢终端?请求下面的接口 —— 它会根据你的 IP 归属地 + 请求头估算风险,并按你的 Accept-Language 请求头返回对应语言。',
+      '只读接口显示 IP 衍生国家／时区与请求头背景。它只是估算，不返回账号数据，也不是 Anthropic 服务。',
     'api.ex1': '# 文本报告 —— 跟随 Accept-Language',
-    'api.ex2': '# 通过请求头指定语言',
-    'api.ex3': '# JSON 输出',
+    'api.ex2': '# 强制中文输出',
+    'api.ex3': '# 结构化 JSON 输出',
 
-    'ui.claudeBadge': 'Claude 同款',
+    'ui.weight': '权重',
+    'ui.contextOnly': '背景信息',
+    'ui.evidence.officialData': '官方披露的数据类别',
+    'ui.evidence.reported': '第三方报告',
+    'ui.evidence.hypothesis': 'QIM 假设',
+    'ui.evidence.context': '零权重背景',
+    'ui.claudeBadge': '第三方报告',
     'ui.retest': '重新扫描',
-    'ui.start': '开始检测',
+    'ui.start': '开始本地扫描',
+
+    'footer.disclaimer': 'QIM 独立研究项目。仅为实验结果，不代表 Anthropic 或 Claude 判断。',
+    'footer.license': 'MIT 开源，并保留原项目署名。',
+    'footer.qim': 'QIM',
+    'footer.fork': 'QIM fork',
+    'footer.repo': '上游项目',
+    'footer.trademark':
+      'Claude 与 Anthropic 名称归其权利人所有；本站仅用于说明所讨论的服务，不表示任何关联。',
+
+    'sponsors.label': '赞助',
+    'sponsors.cta': '了解更多',
+    'cnModels.label': '其他模型',
+    'cnModels.slogan': '探索替代方案',
+    'social.x': 'X',
+    'social.xiaohongshu': '小红书',
+    'social.douyin': '抖音',
+    'social.jike': '即刻',
+    'social.scan': '打开',
   },
 } as const;
 

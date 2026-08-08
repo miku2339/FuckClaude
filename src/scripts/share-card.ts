@@ -1,7 +1,7 @@
 /**
  * Renders the scan result into a square 1080×1080 PNG so it can be attached to
  * a native share (Web Share API `files`) or saved and posted to image-first
- * apps (Douyin / Xiaohongshu / TikTok). Everything is drawn on a canvas from
+ * apps. Everything is drawn on a canvas from
  * same-origin assets, so the result never leaves the browser.
  */
 import type { Lang } from '../i18n/ui';
@@ -28,27 +28,24 @@ export interface CardData {
 
 const SIZE = 1080;
 const C = {
-  bg: '#faf9f5',
+  bg: '#f7f8f4',
   surface: '#ffffff',
-  border: '#e8e4d8',
-  borderStrong: '#d9d3c3',
-  text: '#1f1e1d',
-  muted: '#63615b',
-  muted2: '#8a887f',
-  accent: '#d97757',
-  accentStrong: '#c05f3c',
-  low: '#5e8c61',
-  medium: '#b58121',
-  high: '#bf4d3d',
-  track: '#eceae1',
+  border: '#dbe2df',
+  borderStrong: '#c5d0cc',
+  text: '#0b1220',
+  muted: '#5d6878',
+  muted2: '#7b8796',
+  accent: '#20a99f',
+  accentStrong: '#08756e',
+  low: '#22a65a',
+  medium: '#b77710',
+  high: '#c14b4b',
+  track: '#e7ece9',
 };
-const SERIF = "'Georgia','Times New Roman','Songti SC','STSong','SimSun',serif";
 const SANS =
-  "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif";
+  "'Avenir Next',Avenir,-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif";
 
 const bandColor = (b: RiskBand) => (b === 'low' ? C.low : b === 'medium' ? C.medium : C.high);
-const mascotSrc = (b: RiskBand) =>
-  b === 'low' ? '/mascot/ceo-happy.webp' : b === 'medium' ? '/mascot/ceo-suspect.webp' : '/mascot/ceo-gun.webp';
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const rr = Math.min(r, w / 2, h / 2);
@@ -108,35 +105,24 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
   roundRect(ctx, 24, 24, SIZE - 48, SIZE - 48, 40);
   ctx.stroke();
 
-  // Header: accent chip + wordmark, URL on the right.
+  // Header: the current QIM wordmark + product name, URL on the right.
+  const logo = await loadImage('/qim-logo.svg');
   ctx.textBaseline = 'middle';
   const headY = 92;
-  roundRect(ctx, 80, headY - 22, 44, 44, 12);
-  ctx.fillStyle = C.accent;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-  ctx.lineWidth = 5;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  for (let i = 0; i < 3; i++) {
-    const a = (Math.PI / 3) * i;
-    ctx.moveTo(102 - Math.cos(a) * 11, headY - Math.sin(a) * 11);
-    ctx.lineTo(102 + Math.cos(a) * 11, headY + Math.sin(a) * 11);
-  }
-  ctx.stroke();
+  if (logo) ctx.drawImage(logo, 80, headY - 30, 180, 60);
   ctx.textAlign = 'left';
-  ctx.font = `700 34px ${SANS}`;
+  ctx.font = `700 27px ${SANS}`;
   ctx.fillStyle = C.text;
-  ctx.fillText(d.brand, 140, headY + 1);
+  ctx.fillText(d.brand, logo ? 282 : 80, headY + 1);
   ctx.textAlign = 'right';
   ctx.font = `500 24px ${SANS}`;
   ctx.fillStyle = C.muted2;
-  ctx.fillText('fuck-claude.vercel.app', SIZE - 80, headY + 1);
+  ctx.fillText('fuckclaude.qimake.com', SIZE - 80, headY + 1);
 
   // Title.
   ctx.textAlign = 'center';
   ctx.fillStyle = C.text;
-  ctx.font = `700 52px ${SERIF}`;
+  ctx.font = `700 52px ${SANS}`;
   const titleLines = wrapText(ctx, d.title, SIZE - 200).slice(0, 2);
   let ty = 208;
   for (const line of titleLines) {
@@ -144,23 +130,11 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
     ty += 64;
   }
 
-  // Mascot (loaded first so we know whether to centre the ring).
-  const mascot = await loadImage(mascotSrc(d.band));
+  // Score ring: deliberately neutral, with no Anthropic likeness or mascot.
   const midY = 470;
-  const ringCx = mascot ? 380 : SIZE / 2;
+  const ringCx = SIZE / 2;
   const ringR = 150;
   const ringW = 30;
-
-  if (mascot) {
-    const mh = 300;
-    const mw = (mascot.width / mascot.height) * mh;
-    ctx.save();
-    ctx.shadowColor = 'rgba(31,30,29,0.12)';
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 12;
-    ctx.drawImage(mascot, 720 - mw / 2, midY - mh / 2, mw, mh);
-    ctx.restore();
-  }
 
   // Score ring.
   ctx.lineCap = 'round';
@@ -178,7 +152,7 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
     ctx.stroke();
   }
   ctx.fillStyle = C.text;
-  ctx.font = `700 130px ${SERIF}`;
+  ctx.font = `700 130px ${SANS}`;
   ctx.textAlign = 'center';
   ctx.fillText(String(d.score), ringCx, midY - 6);
   ctx.fillStyle = C.muted2;
@@ -215,7 +189,9 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
   ctx.font = `500 26px ${SANS}`;
   ctx.textAlign = 'center';
   ctx.fillText(
-    d.lang === 'zh' ? '在 fuck-claude.vercel.app 测测你的' : 'Measure yours at fuck-claude.vercel.app',
+    d.lang === 'zh'
+      ? 'QIM 公益开发者项目 · fuckclaude.qimake.com'
+      : 'QIM public-interest developer project · fuckclaude.qimake.com',
     SIZE / 2,
     SIZE - 68,
   );

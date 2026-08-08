@@ -1,65 +1,88 @@
 ---
 import { useTranslations, type Lang } from '../i18n/ui';
 import { SIGNALS } from '../config/signals';
-import { GUIDES } from '../config/guides';
 import LangToggle from './LangToggle.astro';
 import ScoreRing from './ScoreRing.astro';
-import Mascot from './Mascot.astro';
-import Sponsors from './Sponsors.astro';
-import CnModels from './CnModels.astro';
-import SocialLinks from './SocialLinks.astro';
 import Footer from './Footer.astro';
 
 interface Props {
   lang: Lang;
   path: string;
 }
+
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const home = lang === 'zh' ? '/zh/' : '/';
-
-const API_BASE = 'https://fuck-claude.vercel.app/api/check';
+const API_BASE = 'https://fuckclaude.qimake.com/api/check';
 const apiExamples = [
   { comment: t('api.ex1'), cmd: `curl ${API_BASE}` },
   { comment: t('api.ex2'), cmd: `curl -H "Accept-Language: zh" ${API_BASE}` },
   { comment: t('api.ex3'), cmd: `curl ${API_BASE}?format=json` },
 ];
+
+const evidenceCards = [
+  {
+    tone: 'official',
+    label: t('ui.evidence.officialData'),
+    title: t('evidence.policy.title'),
+    body: t('evidence.policy.body'),
+    links: [
+      {
+        label: t('evidence.policy.link'),
+        href: 'https://www.anthropic.com/supported-countries',
+      },
+      {
+        label: t('evidence.location.link'),
+        href: 'https://privacy.claude.com/en/articles/11186740-does-claude-use-my-location',
+      },
+      {
+        label: t('evidence.privacy.link'),
+        href: 'https://www.anthropic.com/legal/privacy',
+      },
+    ],
+  },
+  {
+    tone: 'reported',
+    label: t('ui.evidence.reported'),
+    title: t('evidence.report.title'),
+    body: t('evidence.report.body'),
+    links: [
+      {
+        label: t('evidence.report.link'),
+        href: 'https://github.com/LinXiaoTao/FuckClaude',
+      },
+    ],
+  },
+  {
+    tone: 'experimental',
+    label: t('ui.evidence.hypothesis'),
+    title: t('evidence.hypothesis.title'),
+    body: t('evidence.hypothesis.body'),
+    links: [],
+  },
+];
 ---
 
 <header class="nav">
   <div class="wrap nav__inner">
-    <a class="brand" href={home}>
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="currentColor"></rect>
-        <g fill="#FAF9F5">
-          <rect x="26.9" y="8" width="7.6" height="29" rx="3.8"></rect>
-          <rect x="18.9" y="24.5" width="6.4" height="11" rx="3.2"></rect>
-          <rect x="36.1" y="24.5" width="6.4" height="11" rx="3.2"></rect>
-          <rect x="16.9" y="30" width="27.6" height="24" rx="9"></rect>
-          <rect x="40.6" y="32.5" width="7.6" height="16" rx="3.8" transform="rotate(-24 44.4 40.5)"></rect>
-        </g>
-      </svg>
-      <span class="brand__text">{t('nav.title')}</span>
+    <a class="brand" href={home} aria-label={t('nav.title')}>
+      <img src="/qim-logo.svg" alt="QIM" width="96" height="32" />
+      <span class="brand__divider" aria-hidden="true"></span>
+      <span class="brand__product">{t('nav.product')}</span>
     </a>
-    <nav class="nav__actions">
-      <a class="nav__link" href={lang === 'zh' ? '/zh/guides/' : '/guides/'}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-          <path d="M6 6h10"></path>
-          <path d="M6 10h10"></path>
-        </svg>
-        <span>{t('nav.guides')}</span>
-      </a>
+
+    <nav class="nav__actions" aria-label="Primary">
+      <a class="nav__link" href="#evidence-sec">{t('nav.evidence')}</a>
+      <a class="nav__link" href="#how-sec">{t('nav.method')}</a>
       <LangToggle lang={lang} />
-      <SocialLinks lang={lang} />
       <a
         class="icon-link"
-        href="https://github.com/LinXiaoTao/FuckClaude"
+        href="https://github.com/miku233333/FuckClaude"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="GitHub"
+        aria-label="GitHub · QIM fork"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.3-1.8-1.3-1.8-1.1-.7 0-.7 0-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"></path>
         </svg>
       </a>
@@ -67,203 +90,290 @@ const apiExamples = [
   </div>
 </header>
 
-<Sponsors lang={lang} />
-
-<main class="wrap">
+<main>
   <section class="hero">
-    <div class="credit">
-      <span class="credit__spark" aria-hidden="true"></span>
-      <span class="credit__text">{t('credit')}</span>
-    </div>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <div class="eyebrow">
+          <span class="eyebrow__dot" aria-hidden="true"></span>
+          {t('hero.eyebrow')}
+        </div>
+        <h1>{t('hero.title')}</h1>
+        <p class="hero__lead">{t('hero.lead')}</p>
 
-    <h1>{t('hero.title')}</h1>
+        <ul class="trust" aria-label={t('privacy.title')}>
+          <li>{t('hero.badge.local')}</li>
+          <li>{t('hero.badge.noUpload')}</li>
+          <li>{t('hero.badge.openSource')}</li>
+        </ul>
 
-    <div class="panel">
-      <div class="panel__main">
-        <Mascot />
-        <ScoreRing lang={lang} />
+        <p class="hero__notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle><path d="M12 10v6M12 7h.01"></path>
+          </svg>
+          <span>{t('hero.notice')}</span>
+        </p>
+        <p class="hero__affiliation">{t('hero.affiliation')}</p>
       </div>
 
-      <div class="result" id="result" hidden>
-        <p class="result__title" id="result-title"></p>
-        <div class="result__hits" id="result-hits"></div>
+      <div class="detector-card" aria-label={t('score.label')}>
+        <div class="detector-card__head">
+          <span>{t('score.label')}</span>
+          <span class="research-chip">QIM · BETA</span>
+        </div>
 
-        <div class="share" id="share" hidden>
-          <span class="share__label">{t('share.label')}</span>
+        <ScoreRing lang={lang} />
 
-          <div class="share__actions">
-            <button
-              class="share__btn share__btn--native"
-              id="share-native"
-              type="button"
-              hidden
-              data-share="native"
-              data-ga-event="share_click"
-              data-ga-id="native"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M16 6l-4-4-4 4"></path><path d="M12 2v13"></path></svg>
-              <span>{t('share.native')}</span>
-            </button>
-            <button
-              class="share__btn share__btn--copy"
-              id="share-copy"
-              type="button"
-              data-share="copy"
-              data-ga-event="share_click"
-              data-ga-id="copy"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span id="share-copy-label">{t('share.copy')}</span>
-            </button>
-          </div>
+        <label class="advanced-optin" for="advanced-optin">
+          <input id="advanced-optin" type="checkbox" />
+          <span>
+            <strong>{t('advanced.title')}</strong>
+            <small>{t('advanced.body')}</small>
+          </span>
+        </label>
 
-          <div class="share__platforms">
-            <a class="share__ico share__ico--x" data-share="x" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="x" aria-label={t('share.to.x')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"></path></svg>
-            </a>
-            <a class="share__ico share__ico--weibo" data-share="weibo" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="weibo" aria-label={t('share.to.weibo')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
-            </a>
-            <a class="share__ico share__ico--telegram" data-share="telegram" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="telegram" aria-label={t('share.to.telegram')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"></path></svg>
-            </a>
-            <a class="share__ico share__ico--facebook" data-share="facebook" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="facebook" aria-label={t('share.to.facebook')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
-            </a>
-            <a class="share__ico share__ico--linkedin" data-share="linkedin" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="linkedin" aria-label={t('share.to.linkedin')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
-            </a>
-            <a class="share__ico share__ico--reddit" data-share="reddit" href="#" target="_blank" rel="noopener noreferrer" data-ga-event="share_click" data-ga-id="reddit" aria-label={t('share.to.reddit')}>
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z"></path></svg>
-            </a>
+        <div class="result" id="result" hidden aria-live="polite">
+          <p class="result__title" id="result-title"></p>
+          <div class="result__hits" id="result-hits"></div>
+
+          <div class="share" id="share" hidden>
+            <span class="share__label">{t('share.label')}</span>
+            <div class="share__actions">
+              <button class="share__btn share__btn--primary" id="share-native" type="button" hidden data-share="native">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"></path><path d="M16 6l-4-4-4 4M12 2v13"></path></svg>
+                <span>{t('share.native')}</span>
+              </button>
+              <button class="share__btn" id="share-copy" type="button" data-share="copy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span id="share-copy-label">{t('share.copy')}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="scan-sec" aria-labelledby="scan-title">
-    <div class="section-head">
-      <h2 id="scan-title">{t('signals.title')}</h2>
-      <p>{t('signals.sub')}</p>
-    </div>
-    <ol class="scan-list" id="scan">
-      {
-        SIGNALS.map((signal) => (
-          <li class="scan-row is-pending" data-signal={signal.id}>
-            <span class="scan-row__icon" set:html={signal.icon} />
-            <span class="scan-row__main">
-              <span class="scan-row__name">
-                {t(`signal.${signal.id}.name`)}
-                <span class="badge">{t('ui.weight')} {signal.weight}</span>
-                {signal.claudeUsed && <span class="badge badge--claude">{t('ui.claudeBadge')}</span>}
-              </span>
-              <span class="scan-row__desc">{t(`signal.${signal.id}.desc`)}</span>
-            </span>
-            <span class="scan-row__status">
-              <span class="scan-row__value" data-field="value" />
-              <span class="scan-row__contrib" data-field="contribution" />
-              <span class="dot" data-field="dot" />
-              <span class="spinner" aria-hidden="true" />
-            </span>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
+  <section id="evidence-sec" class="section section--tint" aria-labelledby="evidence-title">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <div>
+          <span class="section-index">01 · EVIDENCE</span>
+          <h2 id="evidence-title">{t('evidence.title')}</h2>
+        </div>
+        <p>{t('evidence.sub')}</p>
+      </div>
 
-  <section id="how-sec" aria-labelledby="how-title">
-    <div class="section-head">
-      <h2 id="how-title">{t('how.title')}</h2>
-    </div>
-    <div class="prose">
-      <p>{t('how.p1')}</p>
-      <p>{t('how.p2')}</p>
-    </div>
-  </section>
-
-  <section id="api-sec" aria-labelledby="api-title">
-    <div class="section-head">
-      <h2 id="api-title">{t('api.title')}</h2>
-      <p>{t('api.desc')}</p>
-    </div>
-    <div class="api-cmd">
-      <button
-        class="api-cmd__copy"
-        id="api-copy"
-        type="button"
-        data-copy={`curl ${API_BASE}`}
-        data-ga-event="api_copy"
-        data-ga-id="curl"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-        <span id="api-copy-label">{t('share.copy')}</span>
-      </button>
-      <div class="api-cmd__code">
+      <div class="evidence-grid">
         {
-          apiExamples.map((ex) => (
-            <div class="api-cmd__block">
-              <span class="api-cmd__c">{ex.comment}</span>
-              <code class="api-cmd__l">
-                <span class="api-cmd__p" aria-hidden="true">$</span> {ex.cmd}
-              </code>
-            </div>
+          evidenceCards.map((card) => (
+            <article class="evidence-card" data-tone={card.tone}>
+              <span class="evidence-card__label">{card.label}</span>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+              {card.links.length > 0 && (
+                <div class="evidence-card__links">
+                  {card.links.map((link) => (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer">
+                      {link.label}
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </article>
           ))
         }
       </div>
     </div>
   </section>
 
-  <section id="guides-sec" aria-labelledby="guides-title">
-    <div class="section-head" style="display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-      <div>
-        <h2 id="guides-title">{t('guides.title')}</h2>
-        <p>{t('guides.sub')}</p>
+  <section id="scan-sec" class="section" aria-labelledby="scan-title">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <div>
+          <span class="section-index">02 · LOCAL SCAN</span>
+          <h2 id="scan-title">{t('signals.title')}</h2>
+        </div>
+        <p>{t('signals.sub')}</p>
       </div>
-      <a class="nav__link" href={lang === 'zh' ? '/zh/guides/' : '/guides/'}>
-        <span>{t('guides.readMore')} →</span>
-      </a>
-    </div>
-    <div class="guides-showcase">
-      {
-        GUIDES.slice(0, 3).map((guide) => (
-          <a class="guide-box" href={lang === 'zh' ? `/zh/guides/${guide.slug}/` : `/guides/${guide.slug}/`}>
-            <h3>{guide.title[lang]}</h3>
-            <p>{guide.summary[lang]}</p>
-            <span class="guide-box__more">{t('guides.readMore')} →</span>
-          </a>
-        ))
-      }
+
+      <ol class="scan-list" id="scan">
+        {
+          SIGNALS.map((signal) => (
+            <li class="scan-row is-pending" data-signal={signal.id} data-tier={signal.evidence}>
+              <span class="scan-row__icon" set:html={signal.icon} />
+              <span class="scan-row__main">
+                <span class="scan-row__name">{t(`signal.${signal.id}.name`)}</span>
+                <span class="scan-row__desc">{t(`signal.${signal.id}.desc`)}</span>
+                <span class="scan-row__meta">
+                  <span class="badge" data-tier={signal.evidence}>{t(`ui.evidence.${signal.evidence}`)}</span>
+                  <span class="badge badge--weight">
+                    {signal.weight > 0 ? `${t('ui.weight')} ${signal.weight}` : t('ui.contextOnly')}
+                  </span>
+                  {signal.intrusive && <span class="badge badge--optional">{t('advanced.badge')}</span>}
+                </span>
+              </span>
+              <span class="scan-row__status">
+                <span class="scan-row__value" data-field="value"></span>
+                <span class="scan-row__contrib" data-field="contribution"></span>
+                <span class="dot" data-field="dot"></span>
+                <span class="spinner" aria-hidden="true"></span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
     </div>
   </section>
 
-  <CnModels lang={lang} />
+  <section id="hypotheses-sec" class="section section--dark" aria-labelledby="hypotheses-title">
+    <div class="wrap">
+      <div class="section-head section-head--split section-head--inverse">
+        <div>
+          <span class="section-index">03 · HYPOTHESIS LAB</span>
+          <h2 id="hypotheses-title">{t('hypotheses.title')}</h2>
+        </div>
+        <p>{t('hypotheses.sub')}</p>
+      </div>
 
-  <section id="faq-sec" aria-labelledby="faq-title">
-    <div class="section-head">
-      <h2 id="faq-title">{t('faq.title')}</h2>
+      <div class="hypothesis-grid">
+        <article class="hypothesis-card" data-hypothesis="cluster" data-state="pending">
+          <div class="hypothesis-card__top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="6" cy="6" r="2"></circle><circle cx="18" cy="6" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="m7.7 7.1 3.1 8.5M16.3 7.1l-3.1 8.5M8 6h8"></path></svg>
+            <span data-field="status">{t('hypotheses.pending')}</span>
+          </div>
+          <h3>{t('hypotheses.cluster.title')}</h3>
+          <p>{t('hypotheses.cluster.body')}</p>
+          <output data-field="value">—</output>
+        </article>
+
+        <article class="hypothesis-card" data-hypothesis="software" data-state="pending">
+          <div class="hypothesis-card__top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"></rect><path d="M8 22h8M12 18v4"></path></svg>
+            <span data-field="status">{t('hypotheses.pending')}</span>
+          </div>
+          <h3>{t('hypotheses.software.title')}</h3>
+          <p>{t('hypotheses.software.body')}</p>
+          <output data-field="value">—</output>
+        </article>
+
+        <article class="hypothesis-card" data-hypothesis="network" data-state="pending">
+          <div class="hypothesis-card__top">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"></path></svg>
+            <span data-field="status">{t('hypotheses.pending')}</span>
+          </div>
+          <h3>{t('hypotheses.network.title')}</h3>
+          <p>{t('hypotheses.network.body')}</p>
+          <output data-field="value">—</output>
+        </article>
+      </div>
+
+      <p class="hypothesis-footnote">{t('hypotheses.footnote')}</p>
     </div>
-    <div class="faq">
-      {
-        [1, 2, 3, 4].map((i) => (
+  </section>
+
+  <section id="account-sec" class="section" aria-labelledby="account-title">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <div>
+          <span class="section-index">04 · OUTSIDE THE BROWSER</span>
+          <h2 id="account-title">{t('account.title')}</h2>
+        </div>
+        <p>{t('account.sub')}</p>
+      </div>
+
+      <div class="manual-grid">
+        {['phone', 'billing', 'identity', 'egress'].map((item) => (
+          <article class="manual-card">
+            <span>{t('account.manual')}</span>
+            <h3>{t(`account.${item}.title`)}</h3>
+            <p>{t(`account.${item}.body`)}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="how-sec" class="section section--tint" aria-labelledby="how-title">
+    <div class="wrap method-grid">
+      <div>
+        <span class="section-index">05 · METHOD & PRIVACY</span>
+        <h2 id="how-title">{t('how.title')}</h2>
+      </div>
+      <div class="method-copy">
+        <p>{t('how.p1')}</p>
+        <p>{t('how.p2')}</p>
+
+        <div class="privacy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          <div>
+            <h3>{t('privacy.title')}</h3>
+            <p>{t('privacy.body')}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="api-sec" class="section" aria-labelledby="api-title">
+    <div class="wrap api-grid">
+      <div class="section-head">
+        <span class="section-index">06 · EDGE API</span>
+        <h2 id="api-title">{t('api.title')}</h2>
+        <p>{t('api.desc')}</p>
+      </div>
+
+      <div class="api-cmd">
+        <div class="api-cmd__bar">
+          <span>api/check</span>
+          <button class="api-cmd__copy" id="api-copy" type="button" data-copy={`curl ${API_BASE}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="api-copy-label">{t('share.copy')}</span>
+          </button>
+        </div>
+        <div class="api-cmd__code">
+          {apiExamples.map((ex) => (
+            <div class="api-cmd__block">
+              <span class="api-cmd__comment">{ex.comment}</span>
+              <code><span aria-hidden="true">$</span> {ex.cmd}</code>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq-sec" class="section section--tint" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <div>
+        <span class="section-index">07 · FAQ</span>
+        <h2 id="faq-title">{t('faq.title')}</h2>
+      </div>
+      <div class="faq">
+        {[1, 2, 3, 4].map((i) => (
           <details>
             <summary>{t(`faq.q${i}`)}</summary>
             <p>{t(`faq.a${i}`)}</p>
           </details>
-        ))
-      }
+        ))}
+      </div>
     </div>
   </section>
 
-  <section id="privacy-sec">
-    <div class="privacy">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="5" y="11" width="14" height="9" rx="2"></rect>
-        <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
-      </svg>
-      <div>
-        <h2>{t('privacy.title')}</h2>
-        <p>{t('privacy.body')}</p>
+  <section id="public-sec" class="section public-section" aria-labelledby="public-title">
+    <div class="wrap public-card">
+      <div class="public-card__brand">
+        <img src="/qim-logo-dark.svg" alt="QIM" width="120" height="40" />
+        <span>{t('hero.eyebrow')}</span>
+      </div>
+      <div class="public-card__copy">
+        <h2 id="public-title">{t('public.title')}</h2>
+        <p>{t('public.body')}</p>
+        <details>
+          <summary>{t('public.disclaimer.title')}</summary>
+          <p>{t('public.disclaimer.body')}</p>
+        </details>
       </div>
     </div>
   </section>
@@ -274,144 +384,3 @@ const apiExamples = [
 <script>
   import '../scripts/detect';
 </script>
-
-<style>
-  .brand__text {
-    max-width: 52vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  /* Logo-only brand on small screens — the icon row needs the width. */
-  @media (max-width: 560px) {
-    .brand__text {
-      display: none;
-    }
-  }
-
-  .api-cmd {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 14px 16px 16px;
-    border-radius: var(--radius-sm);
-    background: var(--text);
-    color: #f5f3ec;
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-  }
-  .api-cmd__code {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .api-cmd__block {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .api-cmd__c {
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    color: #93b79a;
-  }
-  .api-cmd__l {
-    display: block;
-    font-family: var(--mono);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
-  }
-  .api-cmd__p {
-    color: var(--accent);
-    font-weight: 700;
-    user-select: none;
-  }
-  .api-cmd__copy {
-    align-self: flex-end;
-    margin-bottom: 12px;
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(245, 243, 236, 0.25);
-    background: rgba(245, 243, 236, 0.1);
-    color: #f5f3ec;
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background 0.18s,
-      border-color 0.18s;
-  }
-  .api-cmd__copy:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .api-cmd__copy.is-copied {
-    background: var(--low);
-    border-color: var(--low);
-    color: #fff;
-  }
-  .api-cmd__copy svg {
-    width: 14px;
-    height: 14px;
-    flex: none;
-  }
-
-  /* ---------- guides showcase ---------- */
-  .guides-showcase {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-  }
-  .guide-box {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-    color: var(--text);
-    transition:
-      transform 0.18s,
-      border-color 0.18s,
-      box-shadow 0.18s;
-  }
-  .guide-box:hover {
-    text-decoration: none;
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-    box-shadow: var(--shadow-md);
-  }
-  .guide-box h3 {
-    font-size: 1.05rem;
-    margin: 0 0 8px;
-    line-height: 1.35;
-    color: var(--text);
-  }
-  .guide-box:hover h3 {
-    color: var(--accent-strong);
-  }
-  .guide-box p {
-    font-size: 0.88rem;
-    color: var(--muted);
-    margin: 0 0 14px;
-    line-height: 1.5;
-    flex: 1;
-  }
-  .guide-box__more {
-    font-size: 0.82rem;
-    font-weight: 650;
-    color: var(--accent-strong);
-  }
-</style>
