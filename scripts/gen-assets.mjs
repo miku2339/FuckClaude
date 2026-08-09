@@ -60,7 +60,7 @@ const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"
     <circle cx="303" cy="23" r="5" fill="${TEAL}"/>
     <text x="322" y="31" font-family="Avenir Next, Segoe UI, Arial, sans-serif" font-size="20" fill="${WHITE}">No trackers or ads</text>
   </g>
-  <text x="72" y="572" font-family="Menlo, monospace" font-size="21" fill="${MUTED}">fuckclaude.qimake.com · Not affiliated with Anthropic</text>
+  <text x="72" y="572" font-family="Menlo, monospace" font-size="21" fill="${MUTED}">signals.qimake.com · Not affiliated with Anthropic</text>
 </svg>`;
 
 const rasterizeIcon = (svg, size) =>

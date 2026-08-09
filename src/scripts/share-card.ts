@@ -117,7 +117,7 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
   ctx.textAlign = 'right';
   ctx.font = `500 24px ${SANS}`;
   ctx.fillStyle = C.muted2;
-  ctx.fillText('fuckclaude.qimake.com', SIZE - 80, headY + 1);
+  ctx.fillText('signals.qimake.com', SIZE - 80, headY + 1);
 
   // Title.
   ctx.textAlign = 'center';
@@ -190,8 +190,8 @@ export async function renderResultCard(d: CardData): Promise<Blob | null> {
   ctx.textAlign = 'center';
   ctx.fillText(
     d.lang === 'zh'
-      ? 'QIM 公益开发者项目 · fuckclaude.qimake.com'
-      : 'QIM public-interest developer project · fuckclaude.qimake.com',
+      ? 'QIM 公益开发者项目 · signals.qimake.com'
+      : 'QIM public-interest developer project · signals.qimake.com',
     SIZE / 2,
     SIZE - 68,
   );

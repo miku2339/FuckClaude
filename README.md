@@ -2,7 +2,11 @@
 
 QIM public-interest deployment of the open-source
 [`LinXiaoTao/FuckClaude`](https://github.com/LinXiaoTao/FuckClaude) project:
-<https://fuckclaude.qimake.com>.
+<https://signals.qimake.com>.
+
+The former public address, <https://fuckclaude.qimake.com>, is retained only as
+a permanent, `noindex` redirect so existing links continue to work while QIM's
+neutral product identity remains the canonical source.
 
 The product identity is **QIM Developer Signal Lab**. Claude and Claude Code are
 referenced only to identify the service being discussed. QIM is independent and
@@ -97,6 +101,21 @@ Astro-generated Cloudflare configuration:
 ```bash
 pnpm exec wrangler deploy
 ```
+
+The main Worker keeps both custom domains during the migration window. After
+`signals.qimake.com` passes DNS, TLS, browser and API readback, verify and deploy
+the legacy redirect Worker:
+
+```bash
+pnpm test:redirect
+pnpm exec wrangler deploy -c wrangler.redirect.preview.jsonc
+pnpm exec wrangler deploy -c wrangler.redirect.jsonc
+```
+
+The legacy Worker Route runs before the old Custom Domain, returns a single-hop
+308 to the same path and query on `signals.qimake.com`, and adds
+`X-Robots-Tag: noindex, nofollow`. Keeping the old Custom Domain underneath
+preserves its managed DNS and TLS while making the redirect easy to roll back.
 
 ## Use and responsibility
 

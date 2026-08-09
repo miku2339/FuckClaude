@@ -23,7 +23,7 @@ const {
 } = Astro.props;
 const t = useTranslations(lang);
 
-const site = Astro.site ?? new URL('https://fuckclaude.qimake.com');
+const site = Astro.site ?? new URL('https://signals.qimake.com');
 const canonical = new URL(path, site).href;
 const enUrl = new URL(enPath, site).href;
 const zhUrl = new URL(zhPath, site).href;

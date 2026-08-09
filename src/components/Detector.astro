@@ -13,7 +13,7 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const home = lang === 'zh' ? '/zh/' : '/';
-const API_BASE = 'https://fuckclaude.qimake.com/api/check';
+const API_BASE = new URL('/api/check', Astro.site ?? new URL('https://signals.qimake.com')).href;
 const apiExamples = [
   { comment: t('api.ex1'), cmd: `curl ${API_BASE}` },
   { comment: t('api.ex2'), cmd: `curl -H "Accept-Language: zh" ${API_BASE}` },
