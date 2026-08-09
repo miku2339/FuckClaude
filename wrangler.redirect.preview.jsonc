@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fuckclaude-qimake-redirect-preview",
+  "main": "./src/legacy-redirect.mjs",
+  "compatibility_date": "2026-08-09",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  }
+}

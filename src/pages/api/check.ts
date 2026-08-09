@@ -10,7 +10,7 @@
  *   - `user-agent`            — OS/vendor guess for the emoji signal
  *
  * Fonts (Chinese + vendor faces), Intl locale and WebRTC IP leak are
- * browser-only, so the score is computed over the measurable weight (62/100)
+ * browser-only, so the score is computed over the measurable weight (80/100)
  * and normalised to 0–100. It reuses the exact same pure scorers as the client
  * so results stay consistent.
  *
@@ -40,7 +40,7 @@ import { useTranslations, type Lang } from '../../i18n/ui';
 
 export const prerender = false;
 
-const SITE = 'https://fuckclaude.qimake.com';
+const SITE = 'https://signals.qimake.com';
 
 const CORS: Record<string, string> = {
   'Access-Control-Allow-Origin': SITE,

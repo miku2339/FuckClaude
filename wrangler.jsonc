@@ -7,6 +7,10 @@
   "workers_dev": false,
   "routes": [
     {
+      "pattern": "signals.qimake.com",
+      "custom_domain": true
+    },
+    {
       "pattern": "fuckclaude.qimake.com",
       "custom_domain": true
     }

@@ -10,7 +10,7 @@
   "description": "Independent QIM environment-signal diagnostics for developers, with official policy and experimental hypotheses clearly separated.",
   "license": "MIT",
   "author": "LinXiaoTao",
-  "homepage": "https://fuckclaude.qimake.com",
+  "homepage": "https://signals.qimake.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/miku233333/FuckClaude.git"
@@ -20,7 +20,8 @@
     "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test:redirect": "node scripts/test-legacy-redirect.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.2.0",

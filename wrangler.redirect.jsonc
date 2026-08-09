@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fuckclaude-qimake-redirect",
+  "main": "./src/legacy-redirect.mjs",
+  "compatibility_date": "2026-08-09",
+  "workers_dev": false,
+  // Worker Routes run before a Custom Domain on the same hostname. Keeping the
+  // old Custom Domain underneath preserves managed DNS/TLS during migration.
+  "routes": [
+    {
+      "pattern": "fuckclaude.qimake.com/*",
+      "zone_name": "qimake.com"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

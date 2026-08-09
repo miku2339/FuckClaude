@@ -9,7 +9,7 @@ import cloudflare from '@astrojs/cloudflare';
 // Output stays `static` for every page except the single on-demand
 // `/api/check` route, which runs at the Cloudflare edge.
 export default defineConfig({
-  site: 'https://fuckclaude.qimake.com',
+  site: 'https://signals.qimake.com',
   output: 'static',
   adapter: cloudflare(),
   i18n: {
